@@ -4,6 +4,10 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.jetbrains.kotlin.serialization)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
+
+
 }
 
 android {
@@ -39,19 +43,26 @@ android {
     buildFeatures {
         compose = true
     }
+    buildFeatures {
+        compose = true
+    }
 }
 
 dependencies {
     //Modules
     implementation(project(":feature:challenges"))
     implementation(project(":feature:overview"))
+    implementation(project(":core:data"))
 
     //Navigation 3
-    implementation(libs.androidx.navigation3.runtime)
-    implementation(libs.androidx.navigation3.ui)
-    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+    implementation(libs.compose.navigation)
     implementation(libs.kotlinx.serialization.core)
 
+    ksp(libs.hilt.compiler) // corrected typo: complier -> compiler
+    implementation(libs.hilt)
+
+    implementation(libs.androidx.navigation.common.ktx)
+    implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -61,6 +72,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.firebase.database)
+    implementation(libs.androidx.navigation.runtime.android)
+    implementation(libs.androidx.navigation.compose.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
