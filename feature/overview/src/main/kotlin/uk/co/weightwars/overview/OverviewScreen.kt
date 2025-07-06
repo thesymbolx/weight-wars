@@ -17,16 +17,10 @@ import java.time.LocalDate
 
 @Composable
 fun OverviewScreen(viewModel: OverviewViewModel = hiltViewModel()) {
-
-
     LifecycleResumeEffect(Unit) {
         viewModel.getChallenges()
-
-        onPauseOrDispose {
-            // do any needed clean up here
-        }
+        onPauseOrDispose {}
     }
-
 
     OverviewScreen(viewModel.uiState)
 }

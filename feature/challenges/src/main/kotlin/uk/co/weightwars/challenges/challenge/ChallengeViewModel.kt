@@ -13,9 +13,7 @@ import uk.co.weightwars.database.entities.ActiveChallenge
 import uk.co.weightwars.database.entities.Challenge
 import javax.inject.Inject
 
-data class ChallengeUiState(
-    val categories: List<Challenge> = listOf()
-)
+data class ChallengeUiState(val challenges: List<Challenge> = listOf())
 
 @HiltViewModel
 class ChallengeViewModel @Inject constructor(
@@ -24,23 +22,20 @@ class ChallengeViewModel @Inject constructor(
 ) : ViewModel() {
     var uiState by mutableStateOf(ChallengeUiState())
 
-    fun getChallengeCategories() = viewModelScope.launch {
-        val categories = challengeDao.getAll()
-
-        uiState = uiState.copy(
-            categories = categories
-        )
+    fun getChallenges() = viewModelScope.launch {
+        val challenges = challengeDao.getAll()
+        uiState = uiState.copy(challenges = challenges)
     }
 
     fun saveChallenge(challengeId: Int) = viewModelScope.launch {
-
         val challenge = challengeDao.getChallenge(challengeId)
 
-
-        activeChallengeDao.insert(ActiveChallenge(
-            challenge.id,
-            challenge.title,
-            challenge.hasHardCoreMode
-        ))
+        activeChallengeDao.insert(
+            ActiveChallenge(
+                id = challenge.id,
+                title = challenge.title,
+                isHardcoreMode = false
+            )
+        )
     }
 }

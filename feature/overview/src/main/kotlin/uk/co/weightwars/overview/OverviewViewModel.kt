@@ -24,10 +24,7 @@ class OverviewViewModel @Inject constructor(
     var uiState by mutableStateOf(OverviewUiState())
 
     fun getChallenges() = viewModelScope.launch {
-        val i = activeChallengeDao.getAll()
-
-        uiState = uiState.copy(
-            challenges = i
-        )
+        val activeChallenges = activeChallengeDao.getAll()
+        uiState = uiState.copy(challenges = activeChallenges)
     }
 }

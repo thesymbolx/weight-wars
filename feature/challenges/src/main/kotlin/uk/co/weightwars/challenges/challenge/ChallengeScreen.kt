@@ -14,47 +14,45 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
-import uk.co.weightwars.challenges.challengeCategory.ChallengeCategoryUiState
-import uk.co.weightwars.challenges.challengeCategory.ChallengeCategoryViewModel
 
 @Composable
 fun ChallengeScreen(
     viewModel: ChallengeViewModel = hiltViewModel(),
-    onCategoryClick: (Int) -> Unit
+    onChallengeClick: (Int) -> Unit
 ) {
     val state = viewModel.uiState
 
     LifecycleResumeEffect(Unit) {
-        viewModel.getChallengeCategories()
-
-        onPauseOrDispose {
-            // do any needed clean up here
-        }
+        viewModel.getChallenges()
+        onPauseOrDispose {}
     }
 
     ChallengeScreen(state, {
         viewModel.saveChallenge(it)
-        onCategoryClick(it)
+        onChallengeClick(it)
     })
 }
 
 @Composable
 private fun ChallengeScreen(
     challengeUiState: ChallengeUiState,
-    onCategoryClick: (Int) -> Unit
+    onChallengeClick: (Int) -> Unit
 ) {
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-        challengeUiState.categories.forEach {
-            Card(modifier = Modifier
-                .height(200.dp)
-                .fillMaxWidth()
-                .clickable(true) {
-                    onCategoryClick(it.id)
-                }
+        challengeUiState.challenges.forEach {
+            Card(
+                modifier = Modifier
+                    .height(200.dp)
+                    .fillMaxWidth()
+                    .clickable(true) {
+                        onChallengeClick(it.id)
+                    }
             ) {
                 Text(it.title)
             }
-            Spacer(modifier = Modifier.height(20.dp).fillMaxWidth())
+            Spacer(modifier = Modifier
+                .height(20.dp)
+                .fillMaxWidth())
         }
     }
 }
