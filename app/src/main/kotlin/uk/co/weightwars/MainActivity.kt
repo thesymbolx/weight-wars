@@ -8,11 +8,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -20,22 +18,18 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -43,15 +37,26 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import uk.co.weightwars.challenges.ChallengeCategoryRoute
 import uk.co.weightwars.ui.theme.WeightWarsTheme
-import uk.co.weightwars.challenges.ChallengeListScreen
+import uk.co.weightwars.challenges.challengeNavGraph
+import uk.co.weightwars.database.dao.ChallengeCategoryDao
+import uk.co.weightwars.database.dao.ChallengeDao
+import uk.co.weightwars.database.entities.Challenge
+import uk.co.weightwars.database.entities.ChallengeCategory
 import uk.co.weightwars.overview.OverviewScreen
-import java.util.Map.entry
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject
+    lateinit var challengeCategoryDao: ChallengeCategoryDao
+    @Inject
+    lateinit var activeChallengeDao: ChallengeDao
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -60,14 +65,51 @@ class MainActivity : ComponentActivity() {
                 App()
             }
         }
+
+       // populateCatDatabase()
+       // populateChallengeList()
+    }
+
+    fun populateCatDatabase() {
+        lifecycleScope.launch {
+            challengeCategoryDao.insertAll(
+                listOf(
+                    ChallengeCategory(
+                        id = 1,
+                        title = "Cold Turkey"
+                    )
+                )
+            )
+        }
+    }
+
+    fun populateChallengeList() {
+        lifecycleScope.launch {
+            activeChallengeDao.insertAll(
+                listOf(
+                    Challenge(
+                        id = 1,
+                        title = "No Sugar 3 days",
+                        hasHardCoreMode = true
+                    ),
+                    Challenge(
+                        id = 2,
+                        title = "No Sugar 7 days",
+                        hasHardCoreMode = true
+                    ),
+                    Challenge(
+                        id = 3,
+                        title = "No Sugar 30 days",
+                        hasHardCoreMode = true
+                    )
+                )
+            )
+        }
     }
 }
 
 @Serializable
 data object RouteA
-
-@Serializable
-data object RouteB
 
 @Composable
 fun App() {
@@ -94,9 +136,8 @@ fun App() {
                         OverviewScreen()
                     }
 
-                    composable<RouteB> {
-                        ChallengeListScreen()
-                    }
+                    challengeNavGraph(navController)
+
                 }
             }
         }
@@ -147,7 +188,7 @@ class NasaAppState(
 
         when (topLevelDestination.route) {
             is RouteA -> navController.navigate(RouteA, topLevelNavOptions)
-            is RouteB -> navController.navigate(RouteB, topLevelNavOptions)
+            is ChallengeCategoryRoute -> navController.navigate(ChallengeCategoryRoute, topLevelNavOptions)
         }
     }
 }
@@ -156,7 +197,7 @@ data class TopLevelRoute<T : Any>(val route: T, val icon: Int)
 
 val TOP_LEVEL_ROUTES = listOf(
     TopLevelRoute(route = RouteA, icon = R.drawable.ic_launcher_background),
-    TopLevelRoute(route = RouteB, icon = R.drawable.ic_launcher_foreground)
+    TopLevelRoute(route = ChallengeCategoryRoute, icon = R.drawable.ic_launcher_foreground)
 )
 
 @SuppressLint("RestrictedApi")

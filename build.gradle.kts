@@ -6,5 +6,5 @@ plugins {
     alias(libs.plugins.google.gms.google.services) apply false
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.ksp) version libs.versions.ksp.get()
-    alias(libs.plugins.hilt) apply false
+    alias(libs.plugins.hilt) version libs.versions.hilt.get() apply false
 }

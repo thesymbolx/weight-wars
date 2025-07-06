@@ -1,4 +1,4 @@
-package uk.co.weightwars.overview
+package uk.co.weightwars.challenges.challengeCategory
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -9,25 +9,25 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import uk.co.weightwars.database.dao.ActiveChallengeDao
 import uk.co.weightwars.database.dao.ChallengeCategoryDao
-import uk.co.weightwars.database.entities.ActiveChallenge
 import uk.co.weightwars.database.entities.ChallengeCategory
 import javax.inject.Inject
 
-data class OverviewUiState(
-    val challenges: List<ActiveChallenge> = emptyList()
+data class ChallengeCategoryUiState(
+    val categories: List<ChallengeCategory> = listOf()
 )
 
 @HiltViewModel
-class OverviewViewModel @Inject constructor(
+class ChallengeCategoryViewModel @Inject constructor(
+    private val challengeCategoryDao: ChallengeCategoryDao,
     private val activeChallengeDao: ActiveChallengeDao
 ) : ViewModel() {
-    var uiState by mutableStateOf(OverviewUiState())
+    var uiState by mutableStateOf(ChallengeCategoryUiState())
 
-    fun getChallenges() = viewModelScope.launch {
-        val i = activeChallengeDao.getAll()
+    fun getChallengeCategories() = viewModelScope.launch {
+        val categories = challengeCategoryDao.getAll()
 
         uiState = uiState.copy(
-            challenges = i
+            categories = categories
         )
     }
 }
