@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import uk.co.weightwars.database.entities.ActiveChallenge
-import uk.co.weightwars.database.entities.Challenge
 
 @Dao
 interface ActiveChallengeDao {

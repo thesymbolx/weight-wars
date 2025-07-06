@@ -10,7 +10,7 @@ import uk.co.weightwars.database.entities.Challenge
 import uk.co.weightwars.database.entities.ChallengeCategory
 
 @Database(entities = [Challenge::class, ChallengeCategory::class, ActiveChallenge::class], version = 1)
-abstract class WeightWarsDatabase : RoomDatabase() {
+abstract class RoomDatabase : RoomDatabase() {
     abstract fun challengeDao(): ChallengeDao
     abstract fun challengeCategoryDao(): ChallengeCategoryDao
     abstract fun activeChallengeDao(): ActiveChallengeDao

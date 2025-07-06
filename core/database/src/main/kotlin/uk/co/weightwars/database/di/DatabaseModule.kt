@@ -7,7 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import uk.co.weightwars.database.WeightWarsDatabase
+import uk.co.weightwars.database.RoomDatabase
 import uk.co.weightwars.database.dao.ChallengeCategoryDao
 import uk.co.weightwars.database.dao.ChallengeDao
 import javax.inject.Singleton
@@ -19,22 +19,22 @@ DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideRoom(@ApplicationContext context: Context): WeightWarsDatabase =
+    fun provideRoom(@ApplicationContext context: Context): RoomDatabase =
         Room.databaseBuilder(
             context = context,
-            klass = WeightWarsDatabase::class.java,
+            klass = RoomDatabase::class.java,
             name = "database-weight-wars"
         ).build()
 
     @Provides
-    fun challengeDaoBinding(roomDatabase: WeightWarsDatabase): ChallengeDao =
+    fun challengeDaoBinding(roomDatabase: RoomDatabase): ChallengeDao =
         roomDatabase.challengeDao()
 
     @Provides
-    fun challengeCategoryBinding(roomDatabase: WeightWarsDatabase): ChallengeCategoryDao =
+    fun challengeCategoryBinding(roomDatabase: RoomDatabase): ChallengeCategoryDao =
         roomDatabase.challengeCategoryDao()
 
     @Provides
-    fun activeChallengeBinding(roomDatabase: WeightWarsDatabase) =
+    fun activeChallengeBinding(roomDatabase: RoomDatabase) =
         roomDatabase.activeChallengeDao()
 }
