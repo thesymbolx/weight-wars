@@ -19,34 +19,21 @@ import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navOptions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
-import uk.co.weightwars.challenges.ChallengeCategoryRoute
 import uk.co.weightwars.ui.theme.WeightWarsTheme
-import uk.co.weightwars.challenges.challengeNavGraph
 import uk.co.weightwars.database.dao.ChallengeCategoryDao
 import uk.co.weightwars.database.dao.ChallengeDao
 import uk.co.weightwars.database.entities.Challenge
 import uk.co.weightwars.database.entities.ChallengeCategory
-import uk.co.weightwars.overview.OverviewScreen
 import javax.inject.Inject
 
 @AndroidEntryPoint

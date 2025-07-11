@@ -12,9 +12,12 @@ interface ActiveChallengeDao {
     @Query("SELECT * FROM active_challenges")
     suspend fun getAll(): List<ActiveChallenge>
 
+    @Query("SELECT * FROM active_challenges WHERE id = :id")
+    suspend fun getById(id: Int) : ActiveChallenge
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(favorite: ActiveChallenge)
 
     @Delete
-    suspend fun delete(user: ActiveChallenge)
+    suspend fun delete(challenge: ActiveChallenge)
 }

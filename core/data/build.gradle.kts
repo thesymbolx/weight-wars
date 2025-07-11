@@ -35,6 +35,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:database"))
+
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
     implementation(libs.room.runtime)
