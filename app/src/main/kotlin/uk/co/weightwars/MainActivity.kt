@@ -53,8 +53,8 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        //   populateCatDatabase()
-        //   populateChallengeList()
+           populateCatDatabase()
+           populateChallengeList()
     }
 
     fun populateCatDatabase() {
@@ -77,16 +77,19 @@ class MainActivity : ComponentActivity() {
                     Challenge(
                         id = 1,
                         title = "No Sugar 3 days",
+                        days = 3,
                         hasHardCoreMode = true
                     ),
                     Challenge(
                         id = 2,
                         title = "No Sugar 7 days",
+                        days = 7,
                         hasHardCoreMode = true
                     ),
                     Challenge(
                         id = 3,
                         title = "No Sugar 30 days",
+                        days = 30,
                         hasHardCoreMode = true
                     )
                 )

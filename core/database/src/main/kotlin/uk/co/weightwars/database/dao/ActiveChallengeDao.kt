@@ -5,12 +5,16 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 import uk.co.weightwars.database.entities.ActiveChallenge
 
 @Dao
 interface ActiveChallengeDao {
     @Query("SELECT * FROM active_challenges")
     suspend fun getAll(): List<ActiveChallenge>
+
+    @Query("SELECT * FROM active_challenges")
+    fun getAllFlow(): Flow<List<ActiveChallenge>>
 
     @Query("SELECT * FROM active_challenges WHERE id = :id")
     suspend fun getById(id: Int) : ActiveChallenge

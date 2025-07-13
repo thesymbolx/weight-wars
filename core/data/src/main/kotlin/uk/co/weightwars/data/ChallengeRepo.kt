@@ -10,9 +10,12 @@ class ChallengeRepo @Inject constructor(
     suspend fun getActiveChallenge(id: Int) =
         activeChallengeDao.getById(id)
 
-    suspend fun getActiveChallenges() =
-        activeChallengeDao.getAll()
+    fun getActiveChallenges() =
+        activeChallengeDao.getAllFlow()
 
     suspend fun deleteActiveChallenge(challenge: ActiveChallenge) =
         activeChallengeDao.delete(challenge)
+
+    suspend fun updateActiveChallenge(challenge: ActiveChallenge) =
+        activeChallengeDao.insert(challenge)
 }

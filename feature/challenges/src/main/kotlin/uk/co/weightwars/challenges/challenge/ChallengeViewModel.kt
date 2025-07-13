@@ -11,6 +11,8 @@ import uk.co.weightwars.database.dao.ActiveChallengeDao
 import uk.co.weightwars.database.dao.ChallengeDao
 import uk.co.weightwars.database.entities.ActiveChallenge
 import uk.co.weightwars.database.entities.Challenge
+import uk.co.weightwars.database.entities.Scoring
+import java.time.LocalDate
 import javax.inject.Inject
 
 data class ChallengeUiState(val challenges: List<Challenge> = listOf())
@@ -30,10 +32,15 @@ class ChallengeViewModel @Inject constructor(
     fun saveChallenge(challengeId: Int) = viewModelScope.launch {
         val challenge = challengeDao.getChallenge(challengeId)
 
+        val now = LocalDate.now()
+
         activeChallengeDao.insert(
             ActiveChallenge(
                 id = challenge.id,
                 title = challenge.title,
+                startDate = now,
+                days = challenge.days,
+                scoring = Scoring(scoredDates = emptySet()),
                 isHardcoreMode = false
             )
         )
