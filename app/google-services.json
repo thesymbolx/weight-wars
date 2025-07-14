@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "27815552535",
+    "firebase_url": "https://dale-weight-wars-default-rtdb.firebaseio.com",
+    "project_id": "dale-weight-wars",
+    "storage_bucket": "dale-weight-wars.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:27815552535:android:b7fb0a87bfab02ec06de52",
+        "android_client_info": {
+          "package_name": "uk.co.weightwars"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGrh60sgGq1YV4uzTl0iknTsp3hGLn3M0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
