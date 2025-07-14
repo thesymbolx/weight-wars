@@ -9,7 +9,7 @@ class ConsecutiveDaysUseCase @Inject constructor() {
     operator fun invoke(date: LocalDate, daysCount: Int) : List<ConsecutiveDay> {
         val days = mutableListOf<ConsecutiveDay>()
 
-        for (x in 0..daysCount) {
+        for (x in 0..daysCount - 1) {
             val newDate = date.plusDays(x.toLong())
             val dayName = newDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
             days.add(

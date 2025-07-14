@@ -17,7 +17,7 @@ interface ActiveChallengeDao {
     fun getAllFlow(): Flow<List<ActiveChallenge>>
 
     @Query("SELECT * FROM active_challenges WHERE id = :id")
-    suspend fun getById(id: Int) : ActiveChallenge
+    fun getById(id: Int) : Flow<ActiveChallenge>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(favorite: ActiveChallenge)

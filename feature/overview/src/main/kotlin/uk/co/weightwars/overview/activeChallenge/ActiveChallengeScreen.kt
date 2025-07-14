@@ -13,10 +13,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import uk.co.weightwars.domain.ConsecutiveDay
 import java.time.LocalDate
 
@@ -26,12 +28,10 @@ fun ActiveChallengeScreen(
     viewModel: ActiveChallengeViewModel = hiltViewModel(),
     onBack: () -> Unit
 ) {
-    LaunchedEffect(Unit) {
-        viewModel.getChallenge(id)
-    }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     ActiveChallengeScreen(
-        activeChallengeState = viewModel.uiState,
+        activeChallengeState = uiState,
         onDelete = {
             viewModel.deleteChallenge()
             onBack()
@@ -55,7 +55,8 @@ fun ActiveChallengeScreen(
 
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = onDelete) {
+            onClick = onDelete
+        ) {
             Text("Delete")
         }
     }
@@ -67,10 +68,11 @@ private fun Days(
     onDayClick: (LocalDate) -> Unit
 ) {
     LazyColumn {
-        items(items = consecutiveDay, key = {it.consecutiveDay.date}) { day ->
-            Column(modifier = Modifier
-                .background(color = if(day.isSelected) Color.Green else Color.Red)
-                .clickable { onDayClick(day.consecutiveDay.localDate) }
+        items(items = consecutiveDay, key = { it.consecutiveDay.date }) { day ->
+            Column(
+                modifier = Modifier
+                    .background(color = if (day.isSelected) Color.Green else Color.Red)
+                    .clickable { onDayClick(day.consecutiveDay.localDate) }
             ) {
                 Text("${day.consecutiveDay.date} ${day.consecutiveDay.dayName}")
                 Spacer(modifier = Modifier.height(16.dp))

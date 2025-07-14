@@ -7,7 +7,7 @@ import javax.inject.Inject
 class ChallengeRepo @Inject constructor(
     private val activeChallengeDao: ActiveChallengeDao
 ) {
-    suspend fun getActiveChallenge(id: Int) =
+    fun getActiveChallenge(id: Int) =
         activeChallengeDao.getById(id)
 
     fun getActiveChallenges() =

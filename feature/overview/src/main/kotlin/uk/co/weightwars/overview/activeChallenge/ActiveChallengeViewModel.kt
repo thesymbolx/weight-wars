@@ -1,18 +1,26 @@
 package uk.co.weightwars.overview.activeChallenge
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.serialization.MissingFieldException
 import uk.co.weightwars.data.ChallengeRepo
 import uk.co.weightwars.database.entities.ActiveChallenge
 import uk.co.weightwars.domain.ConsecutiveDay
 import uk.co.weightwars.domain.ConsecutiveDaysUseCase
+import uk.co.weightwars.overview.overviewScreen.OverviewUiState
 import java.time.LocalDate
+import java.util.MissingFormatArgumentException
+import kotlin.collections.map
 
 data class ActiveChallengeState(
     val name: String = "",
@@ -27,18 +35,18 @@ data class DayState(
 @HiltViewModel
 class ActiveChallengeViewModel @Inject constructor(
     private val challengeRepo: ChallengeRepo,
-    private val consecutiveDaysUseCase: ConsecutiveDaysUseCase
+    private val consecutiveDaysUseCase: ConsecutiveDaysUseCase,
+    private val savedState: SavedStateHandle
 ) : ViewModel() {
-    var uiState by mutableStateOf(ActiveChallengeState())
-
     lateinit var challenge: ActiveChallenge
 
-    fun getChallenge(id: Int) = viewModelScope.launch {
-        val challenge = challengeRepo.getActiveChallenge(id)
-        this@ActiveChallengeViewModel.challenge = challenge
+    val id = savedState.get<Int>("activeChallengeId") ?: throw Exception()
+
+    val uiState = challengeRepo.getActiveChallenge(id).map { activeChallenge ->
+        this.challenge = activeChallenge
         val consecutiveDays = consecutiveDaysUseCase(challenge.startDate, challenge.days)
 
-        uiState = uiState.copy(
+        ActiveChallengeState(
             name = challenge.title,
             dayState = consecutiveDays.map { consecutiveDay ->
                 DayState(
@@ -47,7 +55,11 @@ class ActiveChallengeViewModel @Inject constructor(
                 )
             }
         )
-    }
+    }.stateIn(
+        viewModelScope,
+        started = WhileSubscribed(5_000),
+        initialValue = ActiveChallengeState()
+    )
 
     fun deleteChallenge() = viewModelScope.launch {
         challengeRepo.deleteActiveChallenge(challenge)
