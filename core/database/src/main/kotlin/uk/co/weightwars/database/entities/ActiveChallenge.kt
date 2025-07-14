@@ -16,5 +16,32 @@ data class ActiveChallenge(
 )
 
 data class Scoring(
-    val scoredDates: Set<LocalDate>
+    val total: Int,
+    val scores: Set<ScoredDate>
 )
+
+data class ScoredDate(
+    val localDate: LocalDate,
+    val score: Int,
+    val mark: ScoreMark
+)  {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ScoredDate) return false
+        return localDate == other.localDate
+    }
+
+    override fun hashCode(): Int {
+        return localDate.hashCode()
+    }
+
+    override fun toString(): String {
+        return "ScoredDate(localDate=$localDate, score=$score, mark=$mark)"
+    }
+}
+
+enum class ScoreMark {
+    FULL,
+    HALF,
+    NONE
+}

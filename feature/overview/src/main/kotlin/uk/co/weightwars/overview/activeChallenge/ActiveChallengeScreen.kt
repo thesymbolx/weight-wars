@@ -1,13 +1,10 @@
 package uk.co.weightwars.overview.activeChallenge
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -21,7 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,12 +25,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import uk.co.weightwars.domain.ConsecutiveDay
 import java.time.LocalDate
 
 @Composable
 fun ActiveChallengeScreen(
-    id: Int,
     viewModel: ActiveChallengeViewModel = hiltViewModel(),
     onBack: () -> Unit
 ) {
@@ -46,7 +40,7 @@ fun ActiveChallengeScreen(
             viewModel.deleteChallenge()
             onBack()
         },
-        onDayClick = viewModel::onDayClick
+        onDayClick = viewModel::score
     )
 }
 
@@ -62,38 +56,33 @@ fun ActiveChallengeScreen(
                 Text(text = activeChallengeState.name)
             }
 
-            scoringRow(activeChallengeState.dayState, onDayClick)
-
             item {
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = onDelete
-                ) {
-                    Text("Delete")
-                }
+                Text(text = activeChallengeState.totalScore)
             }
+
+            scoringRow(activeChallengeState.scoringDate, onDayClick)
         }
     }
 }
 
 private fun LazyListScope.scoringRow(
-    consecutiveDay: List<DayState>,
-    onDayClick: (LocalDate) -> Unit
-) = items(items = consecutiveDay, key = { it.consecutiveDay.date }) { day ->
+    scoringDateState: List<ScoringDateState>,
+    onScoreClick: (LocalDate) -> Unit
+) = items(items = scoringDateState, key = { it.consecutiveDay.date }) { scoringDateState ->
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp)
-            .background(color = if (day.isSelected) Color.Green else Color.Red)
-            .clickable { onDayClick(day.consecutiveDay.localDate) },
+            .padding(top = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             modifier = Modifier.weight(1f),
-            text = "${day.consecutiveDay.date} ${day.consecutiveDay.dayName}"
+            text = "${scoringDateState.consecutiveDay.date} ${scoringDateState.consecutiveDay.dayName}"
         )
 
-        IconButton(onClick = {}) {
+        IconButton(
+            onClick = { onScoreClick(scoringDateState.consecutiveDay.localDate) }
+        ) {
             Icon(imageVector = Icons.Filled.Done, contentDescription = null)
         }
 
@@ -101,8 +90,6 @@ private fun LazyListScope.scoringRow(
             Icon(imageVector = Icons.Filled.Close, contentDescription = null)
         }
 
-        IconButton(onClick = {}) {
-            Icon(imageVector = Icons.Filled.Delete, contentDescription = null)
-        }
+        Text(text = "${scoringDateState.score}")
     }
 }

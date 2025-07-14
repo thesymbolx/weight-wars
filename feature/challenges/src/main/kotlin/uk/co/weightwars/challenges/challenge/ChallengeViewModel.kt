@@ -40,7 +40,10 @@ class ChallengeViewModel @Inject constructor(
                 title = challenge.title,
                 startDate = now,
                 days = challenge.days,
-                scoring = Scoring(scoredDates = emptySet()),
+                scoring = Scoring(
+                    total = 0,
+                    scores = emptySet()
+                ),
                 isHardcoreMode = false
             )
         )
