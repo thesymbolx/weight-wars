@@ -24,13 +24,20 @@ import kotlin.collections.map
 
 data class ActiveChallengeState(
     val name: String = "",
-    val dayState: List<DayState> = emptyList()
+    val dayState: List<ScoringState> = emptyList()
 )
 
-data class DayState(
+data class ScoringState(
     val isSelected: Boolean,
-    val consecutiveDay: ConsecutiveDay
+    val consecutiveDay: ConsecutiveDay,
+    val scoreState: ScoreState
 )
+
+enum class ScoreState {
+    SUCCESS,
+    FAILED,
+    NO_STATE
+}
 
 @HiltViewModel
 class ActiveChallengeViewModel @Inject constructor(
@@ -49,9 +56,10 @@ class ActiveChallengeViewModel @Inject constructor(
         ActiveChallengeState(
             name = challenge.title,
             dayState = consecutiveDays.map { consecutiveDay ->
-                DayState(
+                ScoringState(
                     isSelected = challenge.scoring.scoredDates.contains(consecutiveDay.localDate),
-                    consecutiveDay = consecutiveDay
+                    consecutiveDay = consecutiveDay,
+                    scoreState = ScoreState.NO_STATE
                 )
             }
         )
