@@ -21,9 +21,7 @@ fun NavGraphBuilder.overviewNavGraph(navController: NavHostController) {
         }
     }
 
-    composable<ActiveChallengeRoute> { navBackStack ->
-        ActiveChallengeScreen {
-            navController.navigateUp()
-        }
+    composable<ActiveChallengeRoute> {
+        ActiveChallengeScreen()
     }
 }

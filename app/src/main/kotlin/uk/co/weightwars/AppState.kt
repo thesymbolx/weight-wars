@@ -1,8 +1,12 @@
 package uk.co.weightwars
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -45,9 +49,9 @@ class AppState(
     }
 }
 
-data class TopLevelRoute<T : Any>(val route: T, val icon: Int)
+data class TopLevelRoute<T : Any>(val route: T, val icon: ImageVector)
 
 val TOP_LEVEL_ROUTES = listOf(
-    TopLevelRoute(route = OverviewRoute, icon = R.drawable.ic_launcher_foreground),
-    TopLevelRoute(route = ChallengeCategoryRoute, icon = R.drawable.ic_launcher_foreground)
+    TopLevelRoute(route = OverviewRoute, icon = Icons.Filled.Home),
+    TopLevelRoute(route = ChallengeCategoryRoute, icon = Icons.Filled.Search)
 )

@@ -41,9 +41,7 @@ android {
     buildFeatures {
         compose = true
     }
-    buildFeatures {
-        compose = true
-    }
+
 }
 
 dependencies {
@@ -52,6 +50,8 @@ dependencies {
     implementation(project(":feature:overview"))
     implementation(project(":core:data"))
     implementation(project(":core:database"))
+    implementation(project(":core:designsystem"))
+
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)

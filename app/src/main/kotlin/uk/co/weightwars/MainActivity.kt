@@ -29,11 +29,11 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import uk.co.weightwars.ui.theme.WeightWarsTheme
 import uk.co.weightwars.database.dao.ChallengeCategoryDao
 import uk.co.weightwars.database.dao.ChallengeDao
 import uk.co.weightwars.database.entities.Challenge
 import uk.co.weightwars.database.entities.ChallengeCategory
+import uk.co.weightwars.designsystem.WeightWarsTheme
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -109,7 +109,6 @@ fun App() {
             bottomBar = {
                 NasaBottomNavigation(appState)
             },
-            contentWindowInsets = WindowInsets.safeContent
         ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
                 AppNavHost(navController)
@@ -153,7 +152,7 @@ fun NasaBottomNavigation(appState: AppState) = NavigationBar(
             icon = {
                 Icon(
                     modifier = Modifier.size(30.dp),
-                    painter = painterResource(topLevelRoute.icon),
+                    imageVector =topLevelRoute.icon,
                     contentDescription = null
                 )
             },
