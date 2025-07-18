@@ -12,6 +12,9 @@ interface ChallengeCategoryDao {
     @Query("SELECT * FROM category_challenges")
     suspend fun getAll(): List<ChallengeCategory>
 
+    @Query("SELECT * FROM category_challenges WHERE categoryId = :id")
+    suspend fun getCategory(id: Long)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(favorite: ChallengeCategory)
 

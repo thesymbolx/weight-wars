@@ -3,15 +3,29 @@ package uk.co.weightwars.database.entities
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.Relation
 import java.time.LocalDate
 
-@Entity(tableName = "active_challenges")
 data class ActiveChallenge(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @Embedded val challengeInfo: ChallengeInfo,
+    @Relation(parentColumn = "challengeInfoId", entityColumn = "challengeInfoParentId")
+    val activeChallengeItems: List<ActiveChallengeItem>
+)
+
+@Entity
+data class ChallengeInfo(
+    @PrimaryKey(autoGenerate = true) val challengeInfoId: Long = 0,
     val title: String,
     val startDate: LocalDate,
     val days: Int,
     val isHardcoreMode: Boolean,
+)
+
+@Entity
+data class ActiveChallengeItem(
+    @PrimaryKey(autoGenerate = true) val activeChallengeItemId: Long = 0,
+    val title: String,
+    val challengeInfoParentId: Long,
     @Embedded val scoring: Scoring
 )
 
@@ -24,7 +38,7 @@ data class ScoredDate(
     val localDate: LocalDate,
     val score: Int,
     val mark: ScoreMark
-)  {
+) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ScoredDate) return false

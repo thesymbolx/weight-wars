@@ -7,10 +7,12 @@ import uk.co.weightwars.database.dao.ActiveChallengeDao
 import uk.co.weightwars.database.dao.ChallengeCategoryDao
 import uk.co.weightwars.database.dao.ChallengeDao
 import uk.co.weightwars.database.entities.ActiveChallenge
+import uk.co.weightwars.database.entities.ActiveChallengeItem
 import uk.co.weightwars.database.entities.Challenge
 import uk.co.weightwars.database.entities.ChallengeCategory
+import uk.co.weightwars.database.entities.ChallengeInfo
 
-@Database(entities = [Challenge::class, ChallengeCategory::class, ActiveChallenge::class], version = 1)
+@Database(entities = [Challenge::class, ChallengeCategory::class, ChallengeInfo::class, ActiveChallengeItem::class], version = 1)
 @TypeConverters(Converters::class)
 abstract class RoomDatabase : RoomDatabase() {
     abstract fun challengeDao(): ChallengeDao

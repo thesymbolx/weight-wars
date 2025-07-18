@@ -5,23 +5,49 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import uk.co.weightwars.database.entities.ActiveChallenge
+import uk.co.weightwars.database.entities.ActiveChallengeItem
+import uk.co.weightwars.database.entities.ChallengeInfo
 
 @Dao
 interface ActiveChallengeDao {
-    @Query("SELECT * FROM active_challenges")
+    @Transaction
+    @Query("SELECT * FROM ChallengeInfo")
     suspend fun getAll(): List<ActiveChallenge>
 
-    @Query("SELECT * FROM active_challenges")
+    @Transaction
+    @Query("SELECT * FROM ChallengeInfo")
     fun getAllFlow(): Flow<List<ActiveChallenge>>
 
-    @Query("SELECT * FROM active_challenges WHERE id = :id")
-    fun getById(id: Int) : Flow<ActiveChallenge>
+    @Transaction
+    @Query("SELECT * FROM ChallengeInfo WHERE challengeInfoId = :challengeInfoId")
+    fun getById(challengeInfoId: Int) : Flow<ActiveChallenge>
+
+    @Transaction
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(activeChallenge: ActiveChallenge) {
+        insert(activeChallenge.challengeInfo)
+        insert(activeChallenge.activeChallengeItems)
+    }
+
+    @Transaction
+    @Delete
+    suspend fun delete(challenge: ActiveChallenge) {
+        delete(challenge.challengeInfo)
+        delete(challenge.activeChallengeItems)
+    }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(favorite: ActiveChallenge)
+    suspend fun insert(items: List<ActiveChallengeItem>)
 
     @Delete
-    suspend fun delete(challenge: ActiveChallenge)
+    suspend fun delete(items: List<ActiveChallengeItem>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(items: ChallengeInfo)
+
+    @Delete
+    suspend fun delete(items: ChallengeInfo)
 }

@@ -12,15 +12,15 @@ interface ChallengeDao {
     @Query("SELECT * FROM challenges")
     suspend fun getAll(): List<Challenge>
 
-    @Query("SELECT * FROM challenges WHERE id = :id") // Select all columns and filter by id
-    suspend fun getChallenge(id: Int): Challenge
+    @Query("SELECT * FROM challenges WHERE challengeId = :id") // Select all columns and filter by id
+    suspend fun getChallenge(id: Long): Challenge
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(favorite: Challenge)
+    suspend fun insert(challenge: Challenge)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(favorite: List<Challenge>)
+    suspend fun insertAll(challenge: List<Challenge>)
 
     @Delete
-    suspend fun delete(user: Challenge)
+    suspend fun delete(challenge: Challenge)
 }

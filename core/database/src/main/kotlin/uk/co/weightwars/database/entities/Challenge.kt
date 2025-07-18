@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "challenges")
 data class Challenge (
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey(autoGenerate = true) val challengeId: Long = 0,
     val title: String,
     val days: Int,
     val hasHardCoreMode: Boolean
