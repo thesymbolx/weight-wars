@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
             challengeCategoryDao.insertAll(
                 listOf(
                     ChallengeCategory(
-                        id = 1,
+                        categoryId = 1,
                         title = "Cold Turkey"
                     )
                 )
@@ -75,19 +75,19 @@ class MainActivity : ComponentActivity() {
             activeChallengeDao.insertAll(
                 listOf(
                     Challenge(
-                        id = 1,
+                        challengeId = 1,
                         title = "No Sugar 3 days",
                         days = 3,
                         hasHardCoreMode = true
                     ),
                     Challenge(
-                        id = 2,
+                        challengeId = 2,
                         title = "No Sugar 7 days",
                         days = 7,
                         hasHardCoreMode = true
                     ),
                     Challenge(
-                        id = 3,
+                        challengeId = 3,
                         title = "No Sugar 30 days",
                         days = 30,
                         hasHardCoreMode = true
@@ -111,7 +111,7 @@ fun App() {
             },
         ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
-                AppNavHost(navController)
+                AppNavHost(navController, appState)
             }
         }
     }

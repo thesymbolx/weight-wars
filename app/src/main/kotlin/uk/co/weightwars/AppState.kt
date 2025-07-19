@@ -14,6 +14,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import uk.co.weightwars.challenges.ChallengeCategoryRoute
+import uk.co.weightwars.challenges.ChallengeCreationRoute
+import uk.co.weightwars.challenges.ChallengeNavGraphRoute
 import uk.co.weightwars.overview.OverviewRoute
 
 @Composable
@@ -33,7 +35,7 @@ class AppState(
     fun navigateToTopLevelDestination(topLevelDestination: TopLevelRoute<out Any>) {
         val topLevelNavOptions = navOptions {
             popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
+                saveState = false
             }
             launchSingleTop = true
             restoreState = true
@@ -41,8 +43,8 @@ class AppState(
 
         when (topLevelDestination.route) {
             is OverviewRoute -> navController.navigate(OverviewRoute, topLevelNavOptions)
-            is ChallengeCategoryRoute -> navController.navigate(
-                ChallengeCategoryRoute,
+            is ChallengeNavGraphRoute -> navController.navigate(
+                ChallengeNavGraphRoute,
                 topLevelNavOptions
             )
         }
@@ -53,5 +55,5 @@ data class TopLevelRoute<T : Any>(val route: T, val icon: ImageVector)
 
 val TOP_LEVEL_ROUTES = listOf(
     TopLevelRoute(route = OverviewRoute, icon = Icons.Filled.Home),
-    TopLevelRoute(route = ChallengeCategoryRoute, icon = Icons.Filled.Search)
+    TopLevelRoute(route = ChallengeNavGraphRoute, icon = Icons.Filled.Search)
 )

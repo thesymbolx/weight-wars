@@ -25,23 +25,19 @@ data class ChallengeInfo(
 data class ActiveChallengeItem(
     @PrimaryKey(autoGenerate = true) val activeChallengeItemId: Long = 0,
     val title: String,
-    val challengeInfoParentId: Long,
-    @Embedded val scoring: Scoring
+    val challengeInfoParentId: Long = 0,
+    val scores: Set<Score> = emptySet(),
+    val lengthInDays: Int
 )
 
-data class Scoring(
-    val total: Int,
-    val scores: Set<ScoredDate>
-)
-
-data class ScoredDate(
+data class Score(
     val localDate: LocalDate,
     val score: Int,
     val mark: ScoreMark
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is ScoredDate) return false
+        if (other !is Score) return false
         return localDate == other.localDate
     }
 

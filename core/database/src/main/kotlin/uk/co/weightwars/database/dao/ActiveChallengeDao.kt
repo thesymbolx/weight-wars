@@ -23,13 +23,20 @@ interface ActiveChallengeDao {
 
     @Transaction
     @Query("SELECT * FROM ChallengeInfo WHERE challengeInfoId = :challengeInfoId")
-    fun getById(challengeInfoId: Int) : Flow<ActiveChallenge>
+    fun getById(challengeInfoId: Long) : Flow<ActiveChallenge>
 
     @Transaction
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(activeChallenge: ActiveChallenge) {
-        insert(activeChallenge.challengeInfo)
-        insert(activeChallenge.activeChallengeItems)
+        val infoId = insert(activeChallenge.challengeInfo)
+
+        val activeChallengeItems = activeChallenge.activeChallengeItems.map {
+            it.copy(
+                challengeInfoParentId = infoId
+            )
+        }
+
+        insert(activeChallengeItems)
     }
 
     @Transaction
@@ -46,7 +53,7 @@ interface ActiveChallengeDao {
     suspend fun delete(items: List<ActiveChallengeItem>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(items: ChallengeInfo)
+    suspend fun insert(items: ChallengeInfo) : Long
 
     @Delete
     suspend fun delete(items: ChallengeInfo)

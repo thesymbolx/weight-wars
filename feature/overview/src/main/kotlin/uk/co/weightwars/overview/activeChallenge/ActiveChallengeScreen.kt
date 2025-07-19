@@ -4,23 +4,23 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,7 +49,7 @@ fun ActiveChallengeScreen(
 @Composable
 fun ActiveChallengeScreen(
     activeChallengeState: ActiveChallengeState,
-    onDayClick: (LocalDate) -> Unit
+    onDayClick: (Long, LocalDate) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -57,17 +57,40 @@ fun ActiveChallengeScreen(
             .padding(horizontal = 8.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        ChallengeCard(activeChallengeState, onDayClick)
+        Header(activeChallengeState.name, activeChallengeState.totalScore)
+
+        activeChallengeState.challenges.forEach { challengeState ->
+            Spacer(modifier = Modifier.height(32.dp))
+            ChallengeCard(
+                challenge = challengeState,
+                onScoreClick = onDayClick
+            )
+        }
     }
 }
 
 @Composable
+private fun Header(title: String, totalScore: Int) {
+    Column {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge
+        )
+
+        Text(
+            text = "$totalScore",
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+
+@Composable
 private fun ChallengeCard(
-    activeChallengeState: ActiveChallengeState,
-    onScoreClick: (LocalDate) -> Unit
+    challenge: ChallengeState,
+    onScoreClick: (Long, LocalDate) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-
 
     Card(
         modifier = Modifier
@@ -80,10 +103,11 @@ private fun ChallengeCard(
                 Column(modifier = Modifier
                     .weight(1f)
                     .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
+                    .clickable { expanded = !expanded }
                 ) {
-                    Text(text = activeChallengeState.name)
+                    Text(text = challenge.name)
 
-                    Text(text = "Total points: ${activeChallengeState.totalScore}")
+                    Text(text = "Total points: ${challenge.totalScore}")
                 }
 
                 IconButton(
@@ -97,7 +121,7 @@ private fun ChallengeCard(
             }
 
             if (expanded) {
-                activeChallengeState.scoringDate.forEach {
+                challenge.challengeDate.forEach {
                     HorizontalDivider()
 
                     Row(
@@ -108,11 +132,11 @@ private fun ChallengeCard(
                     ) {
                         Text(
                             modifier = Modifier.weight(1f),
-                            text = "${it.consecutiveDay.date} ${it.consecutiveDay.dayName}"
+                            text = "${it.formattedDate} ${it.dayName}"
                         )
 
                         IconButton(
-                            onClick = { onScoreClick(it.consecutiveDay.localDate) }
+                            onClick = { onScoreClick(it.id, it.localDate) }
                         ) {
                             Icon(imageVector = Icons.Filled.Done, contentDescription = null)
                         }

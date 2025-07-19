@@ -1,10 +1,9 @@
 package uk.co.weightwars.database
 
 import androidx.room.TypeConverter
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import uk.co.weightwars.database.entities.ScoredDate
+import uk.co.weightwars.database.entities.Score
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -35,13 +34,13 @@ class Converters {
     }
 
     @TypeConverter
-    fun fromLocalDateList(scoredDate: Set<ScoredDate>): String {
+    fun fromLocalDateList(scoredDate: Set<Score>): String {
         return gson.toJson(scoredDate)
     }
 
     @TypeConverter
-    fun toLocalDateSet(jsonString: String): Set<ScoredDate> {
-        val listType = object : TypeToken<Set<ScoredDate>>() {}.type
+    fun toLocalDateSet(jsonString: String): Set<Score> {
+        val listType = object : TypeToken<Set<Score>>() {}.type
         return gson.fromJson(jsonString, listType)
     }
 }

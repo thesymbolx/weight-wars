@@ -5,17 +5,17 @@ import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
 
-class ConsecutiveDaysUseCase @Inject constructor() {
-    operator fun invoke(date: LocalDate, daysCount: Int) : List<ConsecutiveDay> {
-        val days = mutableListOf<ConsecutiveDay>()
+class ConsecutiveDateUseCase @Inject constructor() {
+    operator fun invoke(date: LocalDate, daysCount: Int) : List<ConsecutiveDate> {
+        val days = mutableListOf<ConsecutiveDate>()
 
         for (x in 0..daysCount - 1) {
             val newDate = date.plusDays(x.toLong())
             val dayName = newDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
             days.add(
-                ConsecutiveDay(
+                ConsecutiveDate(
                     newDate,
-                    date = newDate.toString(),
+                    formattedDate = newDate.toString(),
                     dayName = dayName
                 )
             )
@@ -25,8 +25,8 @@ class ConsecutiveDaysUseCase @Inject constructor() {
     }
 }
 
-data class ConsecutiveDay(
+data class ConsecutiveDate(
     val localDate: LocalDate,
-    val date: String,
+    val formattedDate: String,
     val dayName: String
 )

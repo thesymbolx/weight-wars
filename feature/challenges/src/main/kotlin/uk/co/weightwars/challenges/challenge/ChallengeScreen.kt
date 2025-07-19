@@ -14,12 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
-import androidx.lifecycle.compose.LifecycleStartEffect
+import uk.co.weightwars.database.entities.Challenge
 
 @Composable
 fun ChallengeScreen(
     viewModel: ChallengeViewModel = hiltViewModel(),
-    onChallengeClick: (Int) -> Unit
+    onChallengeClick: (Long) -> Unit
 ) {
     val state = viewModel.uiState
 
@@ -29,15 +29,14 @@ fun ChallengeScreen(
     }
 
     ChallengeScreen(state, {
-        viewModel.saveChallenge(it)
-        onChallengeClick(it)
+        onChallengeClick(it.challengeId)
     })
 }
 
 @Composable
 private fun ChallengeScreen(
     challengeUiState: ChallengeUiState,
-    onChallengeClick: (Int) -> Unit
+    onChallengeClick: (Challenge) -> Unit
 ) {
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         challengeUiState.challenges.forEach {
@@ -46,7 +45,7 @@ private fun ChallengeScreen(
                     .height(200.dp)
                     .fillMaxWidth()
                     .clickable(true) {
-                        onChallengeClick(it.id)
+                        onChallengeClick(it)
                     }
             ) {
                 Text(it.title)

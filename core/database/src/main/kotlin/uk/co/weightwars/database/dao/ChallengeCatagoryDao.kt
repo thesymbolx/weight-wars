@@ -9,11 +9,11 @@ import uk.co.weightwars.database.entities.ChallengeCategory
 
 @Dao
 interface ChallengeCategoryDao {
-    @Query("SELECT * FROM category_challenges")
+    @Query("SELECT * FROM ChallengeCategory")
     suspend fun getAll(): List<ChallengeCategory>
 
-    @Query("SELECT * FROM category_challenges WHERE categoryId = :id")
-    suspend fun getCategory(id: Long)
+    @Query("SELECT * FROM ChallengeCategory WHERE categoryId = :id")
+    suspend fun getCategory(id: Long) : ChallengeCategory
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(favorite: ChallengeCategory)

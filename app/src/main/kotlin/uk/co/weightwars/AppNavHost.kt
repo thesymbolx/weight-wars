@@ -10,14 +10,19 @@ import uk.co.weightwars.overview.OverviewRoute
 import uk.co.weightwars.overview.overviewNavGraph
 
 @Composable
-fun AppNavHost(navController: NavHostController) =
+fun AppNavHost(
+    navController: NavHostController,
+    appState: AppState
+) =
     NavHost(
         navController = navController,
         startDestination = OverviewRoute,
         modifier = Modifier.fillMaxSize()
     ) {
         overviewNavGraph(navController)
-        challengeNavGraph(navController)
+        challengeNavGraph(navController) {
+            appState.navigateToTopLevelDestination(TOP_LEVEL_ROUTES[0])
+        }
     }
 
 

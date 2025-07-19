@@ -1,21 +1,19 @@
 package uk.co.weightwars.data
 
-import uk.co.weightwars.database.dao.ActiveChallengeDao
-import uk.co.weightwars.database.entities.ActiveChallenge
+import androidx.lifecycle.ViewModel
+import uk.co.weightwars.database.dao.ChallengeCategoryDao
+import uk.co.weightwars.database.dao.ChallengeDao
 import javax.inject.Inject
 
 class ChallengeRepo @Inject constructor(
-    private val activeChallengeDao: ActiveChallengeDao
-) {
-    fun getActiveChallenge(id: Int) =
-        activeChallengeDao.getById(id)
+    private val challengeDao: ChallengeDao,
+    private val challengeCategoryDao: ChallengeCategoryDao
+) : ViewModel() {
+    suspend fun getCategoryChallenge(id: Long) = challengeCategoryDao.getCategory(id)
 
-    fun getActiveChallenges() =
-        activeChallengeDao.getAllFlow()
+    suspend fun getCategoryChallenges() = challengeCategoryDao.getAll()
 
-    suspend fun deleteActiveChallenge(challenge: ActiveChallenge) =
-        activeChallengeDao.delete(challenge)
+    suspend fun getChallenge(id: Long) = challengeDao.getChallenge(id)
 
-    suspend fun updateActiveChallenge(challenge: ActiveChallenge) =
-        activeChallengeDao.insert(challenge)
+    suspend fun getChallenges() = challengeDao.getAll()
 }

@@ -10,57 +10,77 @@ import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import uk.co.weightwars.data.ChallengeRepo
+import uk.co.weightwars.data.ActiveChallengeRepo
 import uk.co.weightwars.database.entities.ActiveChallenge
+import uk.co.weightwars.database.entities.Score
 import uk.co.weightwars.database.entities.ScoreMark
-import uk.co.weightwars.database.entities.ScoredDate
-import uk.co.weightwars.domain.ConsecutiveDay
-import uk.co.weightwars.domain.ConsecutiveDaysUseCase
+import uk.co.weightwars.domain.ConsecutiveDateUseCase
 import java.time.LocalDate
-import kotlin.collections.map
 
 data class ActiveChallengeState(
     val name: String = "",
-    val scoringDate: List<ScoringDateState> = emptyList(),
-    val totalScore: String = ""
+    val challenges: List<ChallengeState> = emptyList(),
+    val totalScore: Int = 0
 )
 
-data class ScoringDateState(
+data class ChallengeState(
+    val name: String,
+    val totalScore: Int,
+    val challengeDate: List<ChallengeDayState>,
+)
+
+data class ChallengeDayState(
+    val id: Long,
+    val localDate: LocalDate,
+    val formattedDate: String,
+    val dayName: String,
     val score: Int,
     val mark: ScoreMark,
-    val consecutiveDay: ConsecutiveDay
 )
 
 @HiltViewModel
 class ActiveChallengeViewModel @Inject constructor(
-    private val challengeRepo: ChallengeRepo,
-    private val consecutiveDaysUseCase: ConsecutiveDaysUseCase,
+    private val activeChallengeRepo: ActiveChallengeRepo,
+    private val consecutiveDateUseCase: ConsecutiveDateUseCase,
     savedState: SavedStateHandle
 ) : ViewModel() {
-    lateinit var challenge: ActiveChallenge
+    lateinit var activeChallenge: ActiveChallenge
 
-    val id = savedState.get<Int>("activeChallengeId") ?: throw Exception()
+    val id = savedState.get<Long>("activeChallengeId") ?: throw Exception()
 
-    val uiState = challengeRepo.getActiveChallenge(id).map { activeChallenge ->
-        this.challenge = activeChallenge
-        val consecutiveDays = consecutiveDaysUseCase(challenge.startDate, challenge.days)
+    val uiState = activeChallengeRepo.getActiveChallenge(id).map { activeChallenge ->
+        this.activeChallenge = activeChallenge
 
-        val scoringDate = consecutiveDays.map { consecutiveDay ->
-            val scoredDate = activeChallenge.scoring.scores.firstOrNull {
-                it.localDate == consecutiveDay.localDate
-            }
+        val challengeState = activeChallenge.activeChallengeItems.map { challenge ->
+            val consecutiveDate = consecutiveDateUseCase(
+                activeChallenge.challengeInfo.startDate,
+                challenge.lengthInDays
+            )
 
-            ScoringDateState(
-                score = scoredDate?.score ?: 0,
-                mark = scoredDate?.mark ?: ScoreMark.NONE,
-                consecutiveDay = consecutiveDay,
+            ChallengeState(
+                name = challenge.title,
+                totalScore = challenge.scores.sumOf { it.score },
+                challengeDate = consecutiveDate.map { date ->
+                    val score = challenge.scores.firstOrNull { it.localDate == date.localDate }
+
+                    ChallengeDayState(
+                        id = challenge.activeChallengeItemId,
+                        localDate = date.localDate,
+                        formattedDate = date.formattedDate,
+                        dayName = date.dayName,
+                        score = score?.score ?: 0,
+                        mark = score?.mark ?: ScoreMark.NONE
+                    )
+                }
             )
         }
 
         ActiveChallengeState(
-            name = challenge.title,
-            totalScore = challenge.scoring.total.toString(),
-            scoringDate = scoringDate
+            name = activeChallenge.challengeInfo.title,
+            totalScore = activeChallenge.activeChallengeItems.sumOf { score ->
+                score.scores.sumOf { it.score }
+            },
+            challenges = challengeState
         )
     }.stateIn(
         viewModelScope,
@@ -69,33 +89,33 @@ class ActiveChallengeViewModel @Inject constructor(
     )
 
     fun deleteChallenge() = viewModelScope.launch(Dispatchers.IO) {
-        challengeRepo.deleteActiveChallenge(challenge)
+        activeChallengeRepo.deleteActiveChallenge(activeChallenge)
     }
 
-    fun score(date: LocalDate) = viewModelScope.launch(Dispatchers.IO) {
+    fun score(challengeId: Long, date: LocalDate) = viewModelScope.launch(Dispatchers.IO) {
         val scoredFullMark = date == LocalDate.now()
+        val challengeItems = activeChallenge.activeChallengeItems.toMutableList()
+        var challengeItem = challengeItems.first { challengeId == it.activeChallengeItemId }
+        val scores = challengeItem.scores.toMutableSet()
 
-        val scores = challenge
-            .scoring
-            .scores
-            .toMutableSet()
-            .apply {
-                add(
-                    ScoredDate(
-                        localDate = date,
-                        score = if(scoredFullMark) 20 else 10,
-                        mark = if (scoredFullMark) ScoreMark.FULL else ScoreMark.HALF
-                    )
-                )
-            }
-
-        val updatedActiveChallenge = challenge.copy(
-            scoring = challenge.scoring.copy(
-                total = scores.sumOf { it.score },
-                scores = scores
+        scores.add(
+            Score(
+                localDate = date,
+                score = if (scoredFullMark) 20 else 10,
+                mark = if (scoredFullMark) ScoreMark.FULL else ScoreMark.HALF
             )
         )
 
-        challengeRepo.updateActiveChallenge(updatedActiveChallenge)
+        challengeItem = challengeItem.copy(
+            scores = scores
+        )
+
+        challengeItems.add(challengeItem)
+
+        activeChallenge = activeChallenge.copy(
+            activeChallengeItems = challengeItems
+        )
+
+        activeChallengeRepo.updateActiveChallenge(activeChallenge)
     }
 }
