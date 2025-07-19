@@ -21,7 +21,6 @@ val Typography = Typography(
         fontFamily = groteskFontFamily(),
         fontWeight = FontWeight.Normal,
         fontSize = 57.sp,
-        lineHeight = 24.sp,
         letterSpacing = 0.5.sp,
         color = Color.White
     ),
@@ -29,7 +28,6 @@ val Typography = Typography(
         fontFamily = groteskFontFamily(),
         fontWeight = FontWeight.Normal,
         fontSize = 45.sp,
-        lineHeight = 24.sp,
         letterSpacing = 0.5.sp,
         color = Color.White
     ),
@@ -37,7 +35,6 @@ val Typography = Typography(
         fontFamily = groteskFontFamily(),
         fontWeight = FontWeight.Normal,
         fontSize = 36.sp,
-        lineHeight = 24.sp,
         letterSpacing = 0.5.sp,
         color = Color.White
     ),
@@ -67,7 +64,7 @@ val Typography = Typography(
     ),
     titleLarge = TextStyle(
         fontFamily = groteskFontFamily(),
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Medium,
         fontSize = 22.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp,

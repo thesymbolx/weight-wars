@@ -46,9 +46,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            WeightWarsTheme {
-                App()
-            }
+            App()
         }
 
         populateCatDatabase()
@@ -67,13 +65,37 @@ class MainActivity : ComponentActivity() {
                 challenges = listOf(
                     Challenge(
                         challengeId = 1,
-                        title = "No Sugar 7 days",
+                        title = "No Sugar 7 Days",
                         days = 7,
                         hasHardCoreMode = true
                     ),
                     Challenge(
                         challengeId = 2,
-                        title = "No Sugar 30 days",
+                        title = "No Sugar 30 Days",
+                        days = 30,
+                        hasHardCoreMode = true
+                    ),
+                    Challenge(
+                        challengeId = 3,
+                        title = "No Junk Food 7 Days",
+                        days = 30,
+                        hasHardCoreMode = true
+                    ),
+                    Challenge(
+                        challengeId = 4,
+                        title = "No Junk Food 30 Days",
+                        days = 30,
+                        hasHardCoreMode = true
+                    ),
+                    Challenge(
+                        challengeId = 5,
+                        title = "No Gluten 7 Days",
+                        days = 30,
+                        hasHardCoreMode = true
+                    ),
+                    Challenge(
+                        challengeId = 6,
+                        title = "No Gluten 30 Days",
                         days = 30,
                         hasHardCoreMode = true
                     )
@@ -94,15 +116,17 @@ fun App() {
     val navController = rememberNavController()
     val appState = rememberAppState(navController)
 
-    AppBackground(modifier = Modifier) {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            bottomBar = {
-                NasaBottomNavigation(appState)
-            },
-        ) { innerPadding ->
-            Box(modifier = Modifier.padding(innerPadding)) {
-                AppNavHost(navController, appState)
+    WeightWarsTheme {
+        AppBackground(modifier = Modifier) {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                bottomBar = {
+                    NasaBottomNavigation(appState)
+                },
+            ) { innerPadding ->
+                Box(modifier = Modifier.padding(innerPadding)) {
+                    AppNavHost(navController, appState)
+                }
             }
         }
     }

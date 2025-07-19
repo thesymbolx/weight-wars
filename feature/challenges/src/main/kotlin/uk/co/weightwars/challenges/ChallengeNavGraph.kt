@@ -30,22 +30,27 @@ fun NavGraphBuilder.challengeNavGraph(
 ) =
     navigation<ChallengeNavGraphRoute>(startDestination = ChallengeCreationRoute) {
         composable<ChallengeCategoryRoute> {
-            ChallengeCategoryScreen { categoryId ->
-                navController.navigate(ChallengeRoute(categoryId))
-            }
+            ChallengeCategoryScreen(
+                onCategoryClick =  { categoryId ->
+                    navController.navigate(ChallengeRoute(categoryId))
+                },
+                onBack = { navController.navigateUp() }
+            )
         }
 
         composable<ChallengeRoute> { entry ->
-            val parentEntry = navController.getBackStackEntry<ChallengeNavGraphRoute>()
+            val parentEntry = remember(entry) { navController.getBackStackEntry<ChallengeNavGraphRoute>() }
             val sharedViewModel: SharedChallengeViewModel = hiltViewModel(parentEntry)
             val route = entry.toRoute<ChallengeRoute>()
 
             ChallengeScreen(
-                categoryId = route.categoryId
-            ) {
-                sharedViewModel.setChallenge(it)
-                navController.popBackStack(ChallengeCreationRoute, false)
-            }
+                categoryId = route.categoryId,
+                onChallengeClick = {
+                    sharedViewModel.setChallenge(it)
+                    navController.popBackStack(ChallengeCreationRoute, false)
+                },
+                onBack = { navController.navigateUp() }
+            )
         }
 
         composable<ChallengeCreationRoute> { entry ->
