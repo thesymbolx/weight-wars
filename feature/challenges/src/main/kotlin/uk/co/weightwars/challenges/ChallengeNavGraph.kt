@@ -6,6 +6,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
 import uk.co.weightwars.challenges.challenge.ChallengeScreen
 import uk.co.weightwars.challenges.challengeCategory.ChallengeCategoryScreen
@@ -15,7 +16,7 @@ import uk.co.weightwars.challenges.creation.ChallengeCreationScreen
 object ChallengeCategoryRoute
 
 @Serializable
-object ChallengeRoute
+data class ChallengeRoute(val categoryId: Long)
 
 @Serializable
 object ChallengeCreationRoute
@@ -29,16 +30,19 @@ fun NavGraphBuilder.challengeNavGraph(
 ) =
     navigation<ChallengeNavGraphRoute>(startDestination = ChallengeCreationRoute) {
         composable<ChallengeCategoryRoute> {
-            ChallengeCategoryScreen {
-                navController.navigate(ChallengeRoute)
+            ChallengeCategoryScreen { categoryId ->
+                navController.navigate(ChallengeRoute(categoryId))
             }
         }
 
-        composable<ChallengeRoute> {
+        composable<ChallengeRoute> { entry ->
             val parentEntry = navController.getBackStackEntry<ChallengeNavGraphRoute>()
             val sharedViewModel: SharedChallengeViewModel = hiltViewModel(parentEntry)
+            val route = entry.toRoute<ChallengeRoute>()
 
-            ChallengeScreen {
+            ChallengeScreen(
+                categoryId = route.categoryId
+            ) {
                 sharedViewModel.setChallenge(it)
                 navController.popBackStack(ChallengeCreationRoute, false)
             }

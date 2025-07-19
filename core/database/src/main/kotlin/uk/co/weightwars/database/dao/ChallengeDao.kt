@@ -1,26 +1,44 @@
 package uk.co.weightwars.database.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import uk.co.weightwars.database.entities.Challenge
+import uk.co.weightwars.database.entities.ChallengeCategory
+import uk.co.weightwars.database.entities.ChallengeWithCategory
 
 @Dao
 interface ChallengeDao {
-    @Query("SELECT * FROM challenges")
-    suspend fun getAll(): List<Challenge>
+    @Transaction
+    @Query("SELECT * FROM ChallengeCategory")
+    suspend fun getAllCategories(): List<ChallengeWithCategory>
 
-    @Query("SELECT * FROM challenges WHERE challengeId = :id") // Select all columns and filter by id
-    suspend fun getChallenge(id: Long): Challenge
+    @Transaction
+    @Query("SELECT * FROM ChallengeCategory WHERE categoryId = :categoryId")
+    suspend fun getCategory(categoryId: Long): ChallengeWithCategory
+
+    @Transaction
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(challengeWithCategory: ChallengeWithCategory) {
+        val challengeWithCategoryId = insert(challengeWithCategory.challengeCategory)
+
+        val challenges = challengeWithCategory.challenges.map {
+            it.copy(
+                categoryId = challengeWithCategoryId
+            )
+        }
+
+        insert(challenges)
+    }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(challenge: Challenge)
+    suspend fun insert(favorite: ChallengeCategory) : Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(challenge: List<Challenge>)
+    suspend fun insert(challenge: List<Challenge>) : List<Long>
 
-    @Delete
-    suspend fun delete(challenge: Challenge)
+    @Query("SELECT * FROM Challenge WHERE challengeId = :challengeId")
+    suspend fun getChallenge(challengeId: Long): Challenge
 }

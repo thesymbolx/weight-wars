@@ -7,8 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import uk.co.weightwars.database.dao.ActiveChallengeDao
-import uk.co.weightwars.database.dao.ChallengeDao
+import uk.co.weightwars.data.ChallengeRepo
 import uk.co.weightwars.database.entities.Challenge
 import javax.inject.Inject
 
@@ -16,13 +15,12 @@ data class ChallengeUiState(val challenges: List<Challenge> = listOf())
 
 @HiltViewModel
 class ChallengeViewModel @Inject constructor(
-    private val challengeDao: ChallengeDao,
-    private val activeChallengeDao: ActiveChallengeDao
+    private val challengeRepo: ChallengeRepo
 ) : ViewModel() {
     var uiState by mutableStateOf(ChallengeUiState())
 
-    fun getChallenges() = viewModelScope.launch {
-        val challenges = challengeDao.getAll()
+    fun getChallenges(categoryId: Long) = viewModelScope.launch {
+        val challenges = challengeRepo.getChallenges(categoryId)
         uiState = uiState.copy(challenges = challenges)
     }
 }

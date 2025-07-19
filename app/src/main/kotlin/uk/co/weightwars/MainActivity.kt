@@ -6,10 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +19,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -29,17 +26,18 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import uk.co.weightwars.database.dao.ChallengeCategoryDao
+import uk.co.weightwars.data.ChallengeRepo
 import uk.co.weightwars.database.dao.ChallengeDao
 import uk.co.weightwars.database.entities.Challenge
 import uk.co.weightwars.database.entities.ChallengeCategory
+import uk.co.weightwars.database.entities.ChallengeWithCategory
 import uk.co.weightwars.designsystem.WeightWarsTheme
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @Inject
-    lateinit var challengeCategoryDao: ChallengeCategoryDao
+    lateinit var challengeRepo: ChallengeRepo
 
     @Inject
     lateinit var activeChallengeDao: ChallengeDao
@@ -53,47 +51,40 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-           populateCatDatabase()
-           populateChallengeList()
+        populateCatDatabase()
     }
 
     fun populateCatDatabase() {
-        lifecycleScope.launch {
-            challengeCategoryDao.insertAll(
-                listOf(
-                    ChallengeCategory(
-                        categoryId = 1,
-                        title = "Cold Turkey"
-                    )
-                )
-            )
-        }
-    }
 
-    fun populateChallengeList() {
-        lifecycleScope.launch {
-            activeChallengeDao.insertAll(
-                listOf(
+
+
+        listOf(
+            ChallengeWithCategory(
+                challengeCategory = ChallengeCategory(
+                    categoryId = 1,
+                    title = "Cold Turkey"
+                ),
+                challenges = listOf(
                     Challenge(
                         challengeId = 1,
-                        title = "No Sugar 3 days",
-                        days = 3,
-                        hasHardCoreMode = true
-                    ),
-                    Challenge(
-                        challengeId = 2,
                         title = "No Sugar 7 days",
                         days = 7,
                         hasHardCoreMode = true
                     ),
                     Challenge(
-                        challengeId = 3,
+                        challengeId = 2,
                         title = "No Sugar 30 days",
                         days = 30,
                         hasHardCoreMode = true
                     )
                 )
             )
+        ).forEach {
+            lifecycleScope.launch {
+                challengeRepo.setChallengeCategory(it)
+
+            }
+
         }
     }
 }

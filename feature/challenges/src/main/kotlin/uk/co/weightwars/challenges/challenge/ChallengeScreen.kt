@@ -18,13 +18,14 @@ import uk.co.weightwars.database.entities.Challenge
 
 @Composable
 fun ChallengeScreen(
+    categoryId: Long,
     viewModel: ChallengeViewModel = hiltViewModel(),
     onChallengeClick: (Long) -> Unit
 ) {
     val state = viewModel.uiState
 
     LifecycleResumeEffect(Unit) {
-        viewModel.getChallenges()
+        viewModel.getChallenges(categoryId)
         onPauseOrDispose {}
     }
 
