@@ -23,6 +23,6 @@ data class Challenge (
     @PrimaryKey(autoGenerate = true) val challengeId: Long = 0,
     val title: String,
     val days: Int,
-    val hasHardCoreMode: Boolean,
+    val description: String,
     val categoryId: Long = 0
 )

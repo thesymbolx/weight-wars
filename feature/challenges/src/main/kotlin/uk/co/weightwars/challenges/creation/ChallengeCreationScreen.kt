@@ -1,5 +1,6 @@
 package uk.co.weightwars.challenges.creation
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -28,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import uk.co.weightwars.challenges.R
 import uk.co.weightwars.designsystem.WeightWarsTheme
+import uk.co.weightwars.ui.parallaxLayoutModifier
 
 
 @Composable
@@ -67,13 +71,17 @@ fun ChallengeCreationScreen(
     onSave: () -> Unit,
     onBack: () -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    val scrollState = rememberScrollState()
+
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .verticalScroll(scrollState)
+    ) {
         Column(
             modifier = Modifier
                 .weight(1f)
-                .clickable(onClick = addChallengeClick)
         ) {
-            Header(onBack = onBack)
+            Header(scrollState = scrollState, onBack = onBack)
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -107,9 +115,10 @@ fun ChallengeCreationScreen(
 
 @Composable
 private fun Header(
+    scrollState: ScrollState,
     onBack: () -> Unit
 ) {
-    Column {
+    Column(modifier = Modifier.parallaxLayoutModifier(scrollState, 2)) {
         IconButton(onClick = onBack) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
         }
@@ -127,7 +136,8 @@ private fun AddChallenge(
     addChallengeClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier.clickable(onClick = addChallengeClick)
+        modifier = Modifier
+            .clickable(onClick = addChallengeClick)
     ) {
         HorizontalDivider()
 

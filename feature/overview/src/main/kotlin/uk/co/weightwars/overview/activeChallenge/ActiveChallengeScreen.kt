@@ -1,6 +1,7 @@
 package uk.co.weightwars.overview.activeChallenge
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -33,33 +35,45 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import uk.co.weightwars.overview.R
+import uk.co.weightwars.ui.parallaxLayoutModifier
 import java.time.LocalDate
 
 @Composable
 fun ActiveChallengeScreen(
     viewModel: ActiveChallengeViewModel = hiltViewModel(),
+    onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     ActiveChallengeScreen(
         activeChallengeState = uiState,
-        onDayClick = viewModel::score
+        onDayClick = viewModel::score,
+        onBack = onBack
     )
 }
 
 @Composable
 fun ActiveChallengeScreen(
     activeChallengeState: ActiveChallengeState,
-    onDayClick: (Long, LocalDate) -> Unit
+    onDayClick: (Long, LocalDate) -> Unit,
+    onBack: () -> Unit
 ) {
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 8.dp)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
     ) {
 
-        Header(activeChallengeState.name, activeChallengeState.totalScore)
+        Header(
+            scrollState = scrollState,
+            title = activeChallengeState.name,
+            totalScore = activeChallengeState.totalScore,
+            onBack = onBack
+        )
 
         activeChallengeState.challenges.forEach { challengeState ->
             Spacer(modifier = Modifier.height(32.dp))
@@ -72,20 +86,36 @@ fun ActiveChallengeScreen(
 }
 
 @Composable
-private fun Header(title: String, totalScore: Int) {
-    Column {
+private fun Header(
+    title: String,
+    totalScore: Int,
+    scrollState: ScrollState,
+    onBack: () -> Unit
+) {
+    Column(modifier = Modifier.parallaxLayoutModifier(scrollState, 2)) {
+        IconButton(onClick = onBack) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
+        }
+
         Text(
+            modifier = Modifier.padding(16.dp),
+            text = stringResource(R.string.active_challenges),
+            style = MaterialTheme.typography.displaySmall
+        )
+
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp),
             text = title,
             style = MaterialTheme.typography.titleLarge
         )
 
         Text(
-            text = "$totalScore",
+            modifier = Modifier.padding(horizontal = 16.dp),
+            text = stringResource(R.string.total_points, totalScore),
             style = MaterialTheme.typography.bodyLarge
         )
     }
 }
-
 
 @Composable
 private fun ChallengeCard(
@@ -152,5 +182,23 @@ private fun ChallengeCard(
             }
 
         }
+    }
+}
+
+@Composable
+private fun Header(
+    scrollState: ScrollState,
+    onBack: () -> Unit
+) {
+    Column(modifier = Modifier.parallaxLayoutModifier(scrollState, 2)) {
+        IconButton(onClick = onBack) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
+        }
+
+        Text(
+            modifier = Modifier.padding(16.dp),
+            text = stringResource(R.string.active_challenges),
+            style = MaterialTheme.typography.displaySmall
+        )
     }
 }

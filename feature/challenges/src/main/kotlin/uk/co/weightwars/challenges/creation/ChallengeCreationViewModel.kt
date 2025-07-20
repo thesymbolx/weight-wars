@@ -64,9 +64,7 @@ class ChallengeCreationViewModel @Inject constructor(
             activeChallengeRepo.updateActiveChallenge(
                 ActiveChallenge(
                     challengeInfo = ChallengeInfo(
-                        title = challenges.fold("") { old, new ->
-                            "$old, ${new.title}"
-                        },
+                        title = challenges.joinToString(separator = ", ") { it.title },
                         startDate = LocalDate.now(),
                         days = activeChallengeLength,
                         isHardcoreMode = hardCoreMode,

@@ -1,4 +1,5 @@
 <resources>
     <string name="no_challenges_set">No Challenges set</string>
     <string name="total_points">Total points: %1$d</string>
+    <string name="active_challenges">Active Challenges</string>
 </resources> 

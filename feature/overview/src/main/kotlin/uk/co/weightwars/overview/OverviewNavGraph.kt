@@ -15,12 +15,13 @@ data class ActiveChallengeRoute(val activeChallengeId: Long)
 
 fun NavGraphBuilder.overviewNavGraph(navController: NavHostController) {
     composable<OverviewRoute> {
-        OverviewScreen {
-            navController.navigate(ActiveChallengeRoute(it))
-        }
+        OverviewScreen(
+            onChallengeClick = { navController.navigate(ActiveChallengeRoute(it)) },
+            onBack = { navController.navigateUp() }
+        )
     }
 
     composable<ActiveChallengeRoute> {
-        ActiveChallengeScreen()
+        ActiveChallengeScreen(onBack = { navController.navigateUp() })
     }
 }
