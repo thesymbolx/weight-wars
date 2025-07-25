@@ -1,6 +1,7 @@
 package uk.co.weightwars
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
@@ -13,6 +14,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navOptions
 import uk.co.weightwars.challenges.ChallengeNavGraphRoute
+import uk.co.weightwars.friends.FriendsNavGraphRoute
 import uk.co.weightwars.overview.OverviewRoute
 
 @Composable
@@ -40,10 +42,8 @@ class AppState(
 
         when (topLevelDestination.route) {
             is OverviewRoute -> navController.navigate(OverviewRoute, topLevelNavOptions)
-            is ChallengeNavGraphRoute -> navController.navigate(
-                ChallengeNavGraphRoute,
-                topLevelNavOptions
-            )
+            is ChallengeNavGraphRoute -> navController.navigate(ChallengeNavGraphRoute, topLevelNavOptions)
+            is FriendsNavGraphRoute -> navController.navigate(FriendsNavGraphRoute, topLevelNavOptions)
         }
     }
 }
@@ -52,5 +52,7 @@ data class TopLevelRoute<T : Any>(val route: T, val icon: ImageVector)
 
 val TOP_LEVEL_ROUTES = listOf(
     TopLevelRoute(route = OverviewRoute, icon = Icons.Filled.Home),
-    TopLevelRoute(route = ChallengeNavGraphRoute, icon = Icons.Filled.Search)
+    TopLevelRoute(route = ChallengeNavGraphRoute, icon = Icons.Filled.Search),
+    TopLevelRoute(route = FriendsNavGraphRoute, icon = Icons.Filled.AccountCircle)
+
 )

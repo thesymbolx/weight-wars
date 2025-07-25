@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import uk.co.weightwars.data.ActiveChallengeRepo
+import uk.co.weightwars.data.repository.ActiveChallengeRepo
 import uk.co.weightwars.database.entities.ActiveChallenge
 import uk.co.weightwars.database.entities.Score
 import uk.co.weightwars.database.entities.ScoreMark

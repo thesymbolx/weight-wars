@@ -1,9 +1,8 @@
-package uk.co.weightwars.data
+package uk.co.weightwars.data.repository
 
 import androidx.lifecycle.ViewModel
 import uk.co.weightwars.database.dao.ChallengeDao
 import uk.co.weightwars.database.entities.Challenge
-import uk.co.weightwars.database.entities.ChallengeCategory
 import uk.co.weightwars.database.entities.ChallengeWithCategory
 import javax.inject.Inject
 

@@ -45,6 +45,7 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:ui"))
 
+    implementation(libs.firebase.database)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)

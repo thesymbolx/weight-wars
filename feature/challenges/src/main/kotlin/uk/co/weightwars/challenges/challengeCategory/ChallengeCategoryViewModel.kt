@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import uk.co.weightwars.data.ChallengeRepo
+import uk.co.weightwars.data.repository.ChallengeRepo
 import uk.co.weightwars.database.entities.ChallengeCategory
 import javax.inject.Inject
 

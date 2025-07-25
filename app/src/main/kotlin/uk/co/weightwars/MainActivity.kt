@@ -26,7 +26,7 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import uk.co.weightwars.data.ChallengeRepo
+import uk.co.weightwars.data.repository.ChallengeRepo
 import uk.co.weightwars.database.dao.ChallengeDao
 import uk.co.weightwars.database.entities.Challenge
 import uk.co.weightwars.database.entities.ChallengeCategory
@@ -53,9 +53,6 @@ class MainActivity : ComponentActivity() {
     }
 
     fun populateCatDatabase() {
-
-
-
         listOf(
             ChallengeWithCategory(
                 challengeCategory = ChallengeCategory(

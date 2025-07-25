@@ -6,7 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import uk.co.weightwars.data.ActiveChallengeRepo
+import uk.co.weightwars.data.repository.ActiveChallengeRepo
 import uk.co.weightwars.database.entities.ActiveChallenge
 import javax.inject.Inject
 

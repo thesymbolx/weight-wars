@@ -1,13 +1,14 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
 }
 
 android {
-    namespace = "uk.co.weightwars.data"
-    compileSdk = 35
+    namespace = "uk.co.weightwars.network"
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 31
@@ -35,20 +36,15 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:database"))
-    implementation(project(":core:network"))
-
-    ksp(libs.room.compiler)
-    implementation(libs.room.ktx)
-    implementation(libs.room.runtime)
+    implementation(libs.firebase.database)
 
     implementation(libs.hilt)
     ksp(libs.hilt.compiler)
-    implementation(libs.hilt.navigation.compose)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

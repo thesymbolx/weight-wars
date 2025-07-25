@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import uk.co.weightwars.challenges.challengeNavGraph
+import uk.co.weightwars.friends.friendsNavGraph
 import uk.co.weightwars.overview.OverviewRoute
 import uk.co.weightwars.overview.overviewNavGraph
 
@@ -23,6 +24,7 @@ fun AppNavHost(
         challengeNavGraph(navController) {
             appState.navigateToTopLevelDestination(TOP_LEVEL_ROUTES[0])
         }
+        friendsNavGraph(navController)
     }
 
 
