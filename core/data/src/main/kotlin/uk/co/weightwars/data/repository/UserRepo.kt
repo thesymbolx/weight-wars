@@ -12,8 +12,8 @@ class UserRepo @Inject constructor(
     private val userDao: UserDao,
     private val userRemoteDataSource: UserRemoteDataSource
 ) {
-    suspend fun getFriends(): Flow<NetworkUser> {
-        return userRemoteDataSource.getFriends()
+     fun getFriends(userId: Long): Flow<NetworkUser> {
+        return userRemoteDataSource.getFriends(userId)
     }
 
     suspend fun getUser() = userDao.getUser()

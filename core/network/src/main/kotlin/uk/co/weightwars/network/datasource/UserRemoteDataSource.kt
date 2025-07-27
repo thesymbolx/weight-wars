@@ -1,5 +1,6 @@
 package uk.co.weightwars.network.datasource
 
+import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -18,22 +19,40 @@ class UserRemoteDataSource @Inject constructor(
         firebaseDatabase.child("users").child("${user.id}").setValue(user)
     }
 
-    fun getFriends(): Flow<NetworkUser> = callbackFlow {
-        val listener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val user = dataSnapshot.getValue<NetworkUser>()
-
-                if (user != null) {
-                    trySend(user)
-                }
+    fun getFriends(userId: Long): Flow<NetworkUser> = callbackFlow {
+        val listener = object : ChildEventListener {
+            override fun onChildAdded(
+                snapshot: DataSnapshot,
+                previousChildName: String?
+            ) {
+                val friend = snapshot.getValue<NetworkUser>()
+                if(friend != null && userId != friend?.id) trySend(friend)
             }
 
-            override fun onCancelled(databaseError: DatabaseError) {
-
+            override fun onChildChanged(
+                snapshot: DataSnapshot,
+                previousChildName: String?
+            ) {
+                val friend = snapshot.getValue<NetworkUser>()
+                if(friend != null && userId != friend?.id) trySend(friend)
             }
+
+            override fun onChildRemoved(snapshot: DataSnapshot) {
+                //TODO("Not yet implemented")
+            }
+
+            override fun onChildMoved(
+                snapshot: DataSnapshot,
+                previousChildName: String?
+            ) {
+                //TODO("Not yet implemented")
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+
         }
 
-        firebaseDatabase.addValueEventListener(listener)
+        firebaseDatabase.child("users").addChildEventListener(listener)
 
         awaitClose {
             firebaseDatabase.removeEventListener(listener)

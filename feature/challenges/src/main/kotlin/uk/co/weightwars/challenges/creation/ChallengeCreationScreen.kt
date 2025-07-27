@@ -15,7 +15,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import uk.co.weightwars.challenges.R
 import uk.co.weightwars.designsystem.WeightWarsTheme
+import uk.co.weightwars.network.model.NetworkUser
 import uk.co.weightwars.ui.parallaxLayoutModifier
 
 
@@ -60,7 +63,8 @@ fun ChallengeCreationScreen(
         challengeCreationUiState = uiState,
         addChallengeClick = addChallengeClick,
         onSave = viewModel::saveActiveChallenge,
-        onBack = onBack
+        onBack = onBack,
+        onFriendToggle = viewModel::toggleFriendSelection
     )
 }
 
@@ -69,7 +73,8 @@ fun ChallengeCreationScreen(
     challengeCreationUiState: ChallengeCreationUiState,
     addChallengeClick: () -> Unit,
     onSave: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onFriendToggle: (NetworkUser) -> Unit
 ) {
     val scrollState = rememberScrollState()
 
@@ -96,6 +101,14 @@ fun ChallengeCreationScreen(
                     )
                 )
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            FriendsList(
+                friends = challengeCreationUiState.friends,
+                selectedFriends = challengeCreationUiState.selectedFriends,
+                onFriendToggle = onFriendToggle
+            )
         }
 
         Button(
@@ -164,6 +177,81 @@ private fun AddChallenge(
     }
 }
 
+@Composable
+private fun FriendsList(
+    friends: List<NetworkUser>,
+    selectedFriends: List<NetworkUser>,
+    onFriendToggle: (NetworkUser) -> Unit
+) {
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.invite_friends),
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        if (friends.isEmpty()) {
+            Text(
+                text = stringResource(R.string.no_friends_available),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            friends.forEach { friend ->
+                FriendCard(
+                    friend = friend,
+                    isSelected = selectedFriends.contains(friend),
+                    onToggle = { onFriendToggle(friend) }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun FriendCard(
+    friend: NetworkUser,
+    isSelected: Boolean,
+    onToggle: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggle),
+        colors = androidx.compose.material3.CardDefaults.cardColors(
+            containerColor = if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Person,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+            )
+            
+            Text(
+                text = friend.name,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(start = 12.dp),
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
 @Preview(backgroundColor = 0xFF212121, showBackground = true)
 @Composable
 private fun ChallengeCreationScreenPreview() {
@@ -172,7 +260,8 @@ private fun ChallengeCreationScreenPreview() {
             challengeCreationUiState = ChallengeCreationUiState(),
             addChallengeClick = {},
             onSave = {},
-            onBack = {}
+            onBack = {},
+            onFriendToggle = {}
         )
     }
 

@@ -1,15 +1,18 @@
 package uk.co.weightwars.challenges.creation
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.co.weightwars.data.repository.ActiveChallengeRepo
 import uk.co.weightwars.data.repository.ChallengeRepo
+import uk.co.weightwars.data.repository.UserRepo
 import uk.co.weightwars.database.entities.ActiveChallenge
 import uk.co.weightwars.database.entities.ActiveChallengeItem
 import uk.co.weightwars.database.entities.Challenge
@@ -20,7 +23,8 @@ import javax.inject.Inject
 data class ChallengeCreationUiState(
     val isHardCordMode: Boolean = false,
     val selectedChallengeState: List<SelectedChallengeState> = emptyList(),
-    val challengeSaved: Boolean = false
+    val challengeSaved: Boolean = false,
+    val friends: List<FriendState> = emptyList()
 )
 
 data class SelectedChallengeState(
@@ -28,16 +32,37 @@ data class SelectedChallengeState(
     val title: String
 )
 
+data class FriendState(
+    val name: String
+)
 
 @HiltViewModel
 class ChallengeCreationViewModel @Inject constructor(
     val activeChallengeRepo: ActiveChallengeRepo,
-    val challengeRepo: ChallengeRepo
+    val challengeRepo: ChallengeRepo,
+    userRepo: UserRepo
 ) : ViewModel() {
     val challenges = mutableSetOf<Challenge>()
 
-    var uiState by mutableStateOf(ChallengeCreationUiState())
-        private set
+    private val _uiState = MutableStateFlow(ChallengeCreationUiState())
+
+    val uiState = combine(_uiState, userRepo.getFriends()) { uiState, friend ->
+        val friendsList = uiState.friends.toMutableList()
+
+        friendsList.add(
+            FriendState(
+                name = friend.name
+            )
+        )
+
+        uiState.copy(
+            friends = friendsList
+        )
+    }.stateIn(
+        viewModelScope,
+        started = WhileSubscribed(5_000),
+        initialValue = ChallengeCreationUiState()
+    )
 
     fun addChallenge(challengeId: Long) = viewModelScope.launch {
         val challenge: Challenge = with(Dispatchers.IO) {
@@ -46,19 +71,21 @@ class ChallengeCreationViewModel @Inject constructor(
 
         challenges.add(challenge)
 
-        uiState = uiState.copy(
-            selectedChallengeState = challenges.map {
-                SelectedChallengeState(
-                    id = it.challengeId,
-                    title = it.title
-                )
-            }
-        )
+        _uiState.update {
+            it.copy(
+                selectedChallengeState = challenges.map {
+                    SelectedChallengeState(
+                        id = it.challengeId,
+                        title = it.title
+                    )
+                }
+            )
+        }
     }
 
     fun saveActiveChallenge() = viewModelScope.launch {
         val activeChallengeLength = challenges.maxOf { it.days }
-        val hardCoreMode = uiState.isHardCordMode
+        val hardCoreMode = _uiState.value.isHardCordMode
 
         with(Dispatchers.IO) {
             activeChallengeRepo.updateActiveChallenge(
@@ -79,14 +106,18 @@ class ChallengeCreationViewModel @Inject constructor(
             )
         }
 
-        uiState = uiState.copy(
-            challengeSaved = true
-        )
+        _uiState.update {
+            it.copy(
+                challengeSaved = true
+            )
+        }
     }
 
     fun clearSavedEvent() {
-        uiState = uiState.copy(
-            challengeSaved = false
-        )
+        _uiState.update {
+            it.copy(
+                challengeSaved = false
+            )
+        }
     }
 }
