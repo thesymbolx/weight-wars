@@ -2,12 +2,10 @@ package uk.co.weightwars.data.repository
 
 import uk.co.weightwars.database.dao.ActiveChallengeDao
 import uk.co.weightwars.database.entities.ActiveChallenge
-import uk.co.weightwars.network.datasource.RemoteDatabaseDataSource
 import javax.inject.Inject
 
 class ActiveChallengeRepo @Inject constructor(
-    private val activeChallengeDao: ActiveChallengeDao,
-    private val fireBaseDatabase: RemoteDatabaseDataSource
+    private val activeChallengeDao: ActiveChallengeDao
 ) {
     fun getActiveChallenge(id: Long) =
         activeChallengeDao.getById(id)

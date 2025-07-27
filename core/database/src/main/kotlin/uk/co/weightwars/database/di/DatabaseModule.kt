@@ -32,4 +32,8 @@ DatabaseModule {
     @Provides
     fun activeChallengeBinding(roomDatabase: RoomDatabase) =
         roomDatabase.activeChallengeDao()
+
+    @Provides
+    fun userDaoBinding(roomDatabase: RoomDatabase) =
+        roomDatabase.userDao()
 }
