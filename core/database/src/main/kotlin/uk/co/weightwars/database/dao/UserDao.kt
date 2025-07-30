@@ -16,5 +16,5 @@ interface UserDao {
     suspend fun getCurrentUser() : User?
 
     @Query("SELECT id FROM user LIMIT 1")
-    fun getCurrentUserId(): Flow<Long>
+    fun getCurrentUserIdFlow(): Flow<Long>
 }

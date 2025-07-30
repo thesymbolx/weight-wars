@@ -14,12 +14,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,6 +34,10 @@ import kotlin.collections.forEach
 @Composable
 fun FriendsScreen(friendsViewModel: FriendsViewModel = hiltViewModel()) {
     val uiState by friendsViewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        friendsViewModel.init()
+    }
 
     Column {
         TextField(
@@ -51,20 +58,22 @@ fun FriendsScreen(friendsViewModel: FriendsViewModel = hiltViewModel()) {
 
         Spacer(modifier = Modifier.height(50.dp))
 
-        FriendsList(uiState.users) { }
+        FriendsList(uiState.users) { friendId ->
+            friendsViewModel.toggleFriend(friendId)
+        }
     }
 }
 
 @Composable
 private fun FriendsList(
-    friends: List<UserState>,
-    onFriendToggle: (NetworkUser) -> Unit
+    friends: Set<UserState>,
+    onFriendToggle: (Long) -> Unit
 ) {
     Column(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
         Text(
-            text = stringResource(R.string.invite_friends),
+            text = stringResource(R.string.add_friends),
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(bottom = 16.dp)
         )
@@ -80,7 +89,9 @@ private fun FriendsList(
                 FriendCard(
                     friend = friend,
                     isSelected = friend.isSelected,
-                    onToggle = {  }
+                    onToggle = { 
+                        onFriendToggle(friend.id)
+                    }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -100,7 +111,7 @@ private fun FriendCard(
             .clickable(onClick = onToggle),
         colors = androidx.compose.material3.CardDefaults.cardColors(
             containerColor = if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
+                Color(0xFFFFE082) // Deeper gold color
             } else {
                 MaterialTheme.colorScheme.surface
             }
@@ -116,14 +127,26 @@ private fun FriendCard(
                 imageVector = Icons.Filled.Person,
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
-                tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                tint = if (isSelected) Color(0xFF3E2723) else MaterialTheme.colorScheme.onSurface
             )
 
             Text(
                 text = friend.name,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(start = 12.dp),
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                color = if (isSelected) Color(0xFF3E2723) else MaterialTheme.colorScheme.onSurface
+            )
+            
+            Spacer(modifier = Modifier.weight(1f))
+            
+            Switch(
+                checked = isSelected,
+                onCheckedChange = { onToggle() },
+                colors = androidx.compose.material3.SwitchDefaults.colors(
+                    checkedThumbColor = Color(0xFFF57F17), // Darker gold for thumb
+                    checkedTrackColor = Color(0xFFFFB74D), // Medium gold for track
+                    uncheckedBorderColor = MaterialTheme.colorScheme.primary
+                )
             )
         }
     }

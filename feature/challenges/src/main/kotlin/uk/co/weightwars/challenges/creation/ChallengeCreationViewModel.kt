@@ -6,7 +6,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -50,7 +49,7 @@ class ChallengeCreationViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ChallengeCreationUiState())
 
-    val uiState = userRepo.getCurrentUserId().flatMapLatest { currentUserId ->
+    val uiState = userRepo.currentUserIdFlow().flatMapLatest { currentUserId ->
         if(currentUserId != null) {
             combine(_uiState, userRepo.getFriends(currentUserId)) { uiState, friend ->
                 val friendsList = uiState.friends.toMutableList()

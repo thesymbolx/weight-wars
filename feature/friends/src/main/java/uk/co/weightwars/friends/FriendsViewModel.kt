@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.co.weightwars.data.repository.UserRepo
@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 data class FriendsUiState(
     val name: String = "",
-    val users: List<UserState> = emptyList()
+    val users: Set<UserState> = emptySet()
 )
 
 data class UserState(
@@ -29,28 +29,43 @@ class FriendsViewModel @Inject constructor(
     private val userRepo: UserRepo
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(FriendsUiState())
+    val uiState = _uiState.asStateFlow()
 
-    val uiState = combine(_uiState, userRepo.getAllUsers()) { uiState, user ->
-        val users = uiState.users.toMutableList()
+    fun init() {
+        loadUsers()
+    }
 
-        users.add(
-            UserState(
-                id = user.id,
-                name = user.name,
-                isSelected = false
-            )
-        )
-
-        uiState.copy(users = users)
-    }.stateIn(
-        viewModelScope,
-        started = WhileSubscribed(5_000),
-        initialValue = FriendsUiState()
-    )
+    private fun loadUsers() = viewModelScope.launch {
+        userRepo.getAllUsers().collect { user ->
+            _uiState.update { currentState ->
+                val newUser = UserState(
+                    id = user.id,
+                    name = user.name,
+                    isSelected = false
+                )
+                currentState.copy(
+                    users = currentState.users + newUser
+                )
+            }
+        }
+    }
 
     fun onNameChange(newName: String) {
         _uiState.update {
             it.copy(name = newName)
+        }
+    }
+
+    fun toggleFriend(friendId: Long) {
+        _uiState.update { currentState ->
+            val updatedUsers = currentState.users.map { user ->
+                if (user.id == friendId) {
+                    user.copy(isSelected = !user.isSelected)
+                } else {
+                    user
+                }
+            }
+            currentState.copy(users = updatedUsers.toSet())
         }
     }
 
