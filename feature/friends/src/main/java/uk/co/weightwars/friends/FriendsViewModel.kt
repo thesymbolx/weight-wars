@@ -36,16 +36,21 @@ class FriendsViewModel @Inject constructor(
     }
 
     private fun loadUsers() = viewModelScope.launch {
+        val currentUser = userRepo.getUser()
+        val currentUserId = currentUser?.id
+        
         userRepo.getAllUsers().collect { user ->
-            _uiState.update { currentState ->
-                val newUser = UserState(
-                    id = user.id,
-                    name = user.name,
-                    isSelected = false
-                )
-                currentState.copy(
-                    users = currentState.users + newUser
-                )
+            if (currentUserId == null || user.id != currentUserId) {
+                _uiState.update { currentState ->
+                    val newUser = UserState(
+                        id = user.id,
+                        name = user.name,
+                        isSelected = false
+                    )
+                    currentState.copy(
+                        users = currentState.users + newUser
+                    )
+                }
             }
         }
     }

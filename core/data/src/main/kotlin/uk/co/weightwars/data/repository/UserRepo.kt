@@ -18,6 +18,10 @@ class UserRepo @Inject constructor(
         return userRemoteDataSource.getAllUsers()
     }
 
+    fun saveFriend(currentUserId: Long, friendId: Long) {
+
+    }
+
     fun currentUserIdFlow() = userDao.getCurrentUserIdFlow()
 
     suspend fun getUser() = userDao.getCurrentUser()
