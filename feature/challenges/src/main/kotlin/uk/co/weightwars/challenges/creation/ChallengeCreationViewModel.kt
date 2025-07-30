@@ -6,7 +6,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -33,7 +36,8 @@ data class SelectedChallengeState(
 )
 
 data class FriendState(
-    val name: String
+    val name: String,
+    val isSelected: Boolean
 )
 
 @HiltViewModel
@@ -46,18 +50,25 @@ class ChallengeCreationViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ChallengeCreationUiState())
 
-    val uiState = combine(_uiState, userRepo.getFriends()) { uiState, friend ->
-        val friendsList = uiState.friends.toMutableList()
+    val uiState = userRepo.getCurrentUserId().flatMapLatest { currentUserId ->
+        if(currentUserId != null) {
+            combine(_uiState, userRepo.getFriends(currentUserId)) { uiState, friend ->
+                val friendsList = uiState.friends.toMutableList()
 
-        friendsList.add(
-            FriendState(
-                name = friend.name
-            )
-        )
+                friendsList.add(
+                    FriendState(
+                        name = friend.name,
+                        isSelected = false,
+                    )
+                )
 
-        uiState.copy(
-            friends = friendsList
-        )
+                uiState.copy(
+                    friends = friendsList
+                )
+            }
+        } else  {
+            _uiState.map { it.copy(friends = emptyList()) }
+        }
     }.stateIn(
         viewModelScope,
         started = WhileSubscribed(5_000),

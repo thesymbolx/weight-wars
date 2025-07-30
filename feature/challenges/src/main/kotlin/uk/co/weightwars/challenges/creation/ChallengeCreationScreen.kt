@@ -25,6 +25,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -44,7 +46,7 @@ fun ChallengeCreationScreen(
     addChallengeClick: () -> Unit,
     onBack: () -> Unit
 ) {
-    val uiState = viewModel.uiState
+    val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(challenge) {
         if(challenge != null) {
@@ -64,7 +66,7 @@ fun ChallengeCreationScreen(
         addChallengeClick = addChallengeClick,
         onSave = viewModel::saveActiveChallenge,
         onBack = onBack,
-        onFriendToggle = viewModel::toggleFriendSelection
+        onFriendToggle = {}
     )
 }
 
@@ -106,7 +108,6 @@ fun ChallengeCreationScreen(
 
             FriendsList(
                 friends = challengeCreationUiState.friends,
-                selectedFriends = challengeCreationUiState.selectedFriends,
                 onFriendToggle = onFriendToggle
             )
         }
@@ -179,8 +180,7 @@ private fun AddChallenge(
 
 @Composable
 private fun FriendsList(
-    friends: List<NetworkUser>,
-    selectedFriends: List<NetworkUser>,
+    friends: List<FriendState>,
     onFriendToggle: (NetworkUser) -> Unit
 ) {
     Column(
@@ -202,8 +202,8 @@ private fun FriendsList(
             friends.forEach { friend ->
                 FriendCard(
                     friend = friend,
-                    isSelected = selectedFriends.contains(friend),
-                    onToggle = { onFriendToggle(friend) }
+                    isSelected = friend.isSelected,
+                    onToggle = {  }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -213,7 +213,7 @@ private fun FriendsList(
 
 @Composable
 private fun FriendCard(
-    friend: NetworkUser,
+    friend: FriendState,
     isSelected: Boolean,
     onToggle: () -> Unit
 ) {

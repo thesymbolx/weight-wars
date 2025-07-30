@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 import uk.co.weightwars.database.entities.User
 
 @Dao
@@ -12,5 +13,8 @@ interface UserDao {
     suspend fun insert(user: User) : Long
 
     @Query("SELECT * FROM user LIMIT 1")
-    suspend fun getUser() : User?
+    suspend fun getCurrentUser() : User?
+
+    @Query("SELECT id FROM user LIMIT 1")
+    fun getCurrentUserId(): Flow<Long>
 }

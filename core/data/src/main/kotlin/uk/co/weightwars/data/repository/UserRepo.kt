@@ -12,14 +12,18 @@ class UserRepo @Inject constructor(
     private val userDao: UserDao,
     private val userRemoteDataSource: UserRemoteDataSource
 ) {
+     fun getAllUsers() = userRemoteDataSource.getAllUsers()
+
      fun getFriends(userId: Long): Flow<NetworkUser> {
-        return userRemoteDataSource.getFriends(userId)
+        return userRemoteDataSource.getAllUsers()
     }
 
-    suspend fun getUser() = userDao.getUser()
+    fun getCurrentUserId() = userDao.getCurrentUserId()
+
+    suspend fun getUser() = userDao.getCurrentUser()
 
     suspend fun saveUser(user: User) {
-        var dbUser = userDao.getUser()
+        var dbUser = userDao.getCurrentUser()
         var user = if(dbUser == null) user.copy(id = Random.nextLong()) else user
 
         userDao.insert(user)

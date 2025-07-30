@@ -4,7 +4,6 @@ import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.getValue
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -19,14 +18,14 @@ class UserRemoteDataSource @Inject constructor(
         firebaseDatabase.child("users").child("${user.id}").setValue(user)
     }
 
-    fun getFriends(userId: Long): Flow<NetworkUser> = callbackFlow {
+    fun getAllUsers(): Flow<NetworkUser> = callbackFlow {
         val listener = object : ChildEventListener {
             override fun onChildAdded(
                 snapshot: DataSnapshot,
                 previousChildName: String?
             ) {
                 val friend = snapshot.getValue<NetworkUser>()
-                if(friend != null && userId != friend?.id) trySend(friend)
+                if(friend != null) trySend(friend)
             }
 
             override fun onChildChanged(
@@ -34,7 +33,7 @@ class UserRemoteDataSource @Inject constructor(
                 previousChildName: String?
             ) {
                 val friend = snapshot.getValue<NetworkUser>()
-                if(friend != null && userId != friend?.id) trySend(friend)
+                if(friend != null) trySend(friend)
             }
 
             override fun onChildRemoved(snapshot: DataSnapshot) {
@@ -51,6 +50,7 @@ class UserRemoteDataSource @Inject constructor(
             override fun onCancelled(error: DatabaseError) {}
 
         }
+
 
         firebaseDatabase.child("users").addChildEventListener(listener)
 

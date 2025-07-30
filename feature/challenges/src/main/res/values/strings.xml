@@ -5,4 +5,6 @@
     <string name="choose_category">Choose category</string>
     <string name="choose_challenge">Choose challenge</string>
 
+    <string name="invite_friends">Invite Friends</string>
+    <string name="no_friends_available">No Friends Available</string>
 </resources> 
