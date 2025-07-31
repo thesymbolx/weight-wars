@@ -3,14 +3,17 @@ package uk.co.weightwars.friends
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uk.co.weightwars.data.repository.UserRepo
 import uk.co.weightwars.database.entities.User
+import uk.co.weightwars.database.entities.UserWithFriend
 import javax.inject.Inject
 
 data class FriendsUiState(
@@ -37,7 +40,7 @@ class FriendsViewModel @Inject constructor(
 
     private fun loadUsers() = viewModelScope.launch {
         val currentUser = userRepo.getUser()
-        val currentUserId = currentUser?.id
+        val currentUserId = currentUser?.user?.userId
         
         userRepo.getAllUsers().collect { user ->
             if (currentUserId == null || user.id != currentUserId) {
@@ -61,26 +64,34 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
-    fun toggleFriend(friendId: Long) {
-        _uiState.update { currentState ->
-            val updatedUsers = currentState.users.map { user ->
-                if (user.id == friendId) {
-                    user.copy(isSelected = !user.isSelected)
-                } else {
-                    user
+    fun toggleFriend(friendId: Long) = viewModelScope.launch(Dispatchers.IO) {
+        withContext(Dispatchers.Main) {
+            _uiState.update { currentState ->
+                val updatedUsers = currentState.users.map { user ->
+                    if (user.id == friendId) {
+                        user.copy(isSelected = !user.isSelected)
+                    } else {
+                        user
+                    }
                 }
+                currentState.copy(users = updatedUsers.toSet())
             }
-            currentState.copy(users = updatedUsers.toSet())
         }
+
+        val currentUser = userRepo.getUser()
+        val friends = currentUser?.friends?.toMutableList()
+
+
+
     }
 
     fun saveUser() = viewModelScope.launch {
         val user = userRepo.getUser()
         val name = _uiState.value.name
 
-        val userWithName = user?.copy(name = name) ?: User(name = name)
+     //   val userWithName = user?.copy(user = user.user.copy(name = name)) ?: UserWithFriend(user = User(name), friends = emptyList<>())
 
-        userRepo.saveUser(userWithName)
+     //   userRepo.saveUser(userWithName)
     }
 
 }
