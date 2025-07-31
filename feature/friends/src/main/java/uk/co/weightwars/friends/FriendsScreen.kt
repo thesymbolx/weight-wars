@@ -40,6 +40,7 @@ fun FriendsScreen(friendsViewModel: FriendsViewModel = hiltViewModel()) {
     }
 
     Column {
+
         TextField(
             modifier = Modifier.fillMaxWidth(),
             value = uiState.name,
@@ -58,8 +59,16 @@ fun FriendsScreen(friendsViewModel: FriendsViewModel = hiltViewModel()) {
 
         Spacer(modifier = Modifier.height(50.dp))
 
-        FriendsList(uiState.users) { friendId ->
-            friendsViewModel.toggleFriend(friendId)
+        if (uiState.name.isNotEmpty()) {
+            FriendsList(uiState.users) { friendId ->
+                friendsViewModel.toggleFriend(friendId)
+            }
+        } else {
+            Text(
+                text = "Enter name to see friends",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
         }
     }
 }
@@ -67,7 +76,7 @@ fun FriendsScreen(friendsViewModel: FriendsViewModel = hiltViewModel()) {
 @Composable
 private fun FriendsList(
     friends: Set<UserState>,
-    onFriendToggle: (Long) -> Unit
+    onFriendToggle: (UserState) -> Unit
 ) {
     Column(
         modifier = Modifier.padding(horizontal = 16.dp)
@@ -89,8 +98,8 @@ private fun FriendsList(
                 FriendCard(
                     friend = friend,
                     isSelected = friend.isSelected,
-                    onToggle = { 
-                        onFriendToggle(friend.id)
+                    onToggle = {
+                        onFriendToggle(friend)
                     }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -136,9 +145,9 @@ private fun FriendCard(
                 modifier = Modifier.padding(start = 12.dp),
                 color = if (isSelected) Color(0xFF3E2723) else MaterialTheme.colorScheme.onSurface
             )
-            
+
             Spacer(modifier = Modifier.weight(1f))
-            
+
             Switch(
                 checked = isSelected,
                 onCheckedChange = { onToggle() },

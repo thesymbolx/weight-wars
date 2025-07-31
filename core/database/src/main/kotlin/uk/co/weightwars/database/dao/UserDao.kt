@@ -29,8 +29,8 @@ interface UserDao {
     @Query("SELECT * FROM user LIMIT 1")
     suspend fun getCurrentUser() : UserWithFriend?
 
-    @Query("SELECT userId FROM user LIMIT 1")
-    fun getCurrentUserIdFlow(): Flow<Long>
+    @Query("SELECT * FROM user LIMIT 1")
+    fun getCurrentUserFlow(): Flow<User?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFriends(friends: List<Friend>)

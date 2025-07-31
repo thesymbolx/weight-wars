@@ -49,7 +49,9 @@ class ChallengeCreationViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ChallengeCreationUiState())
 
-    val uiState = userRepo.currentUserIdFlow().flatMapLatest { currentUserId ->
+    val uiState = userRepo.currentUserFlow().flatMapLatest { currentUserId ->
+        val currentUserId = currentUserId?.userId
+
         if(currentUserId != null) {
             combine(_uiState, userRepo.getFriends(currentUserId)) { uiState, friend ->
                 val friendsList = uiState.friends.toMutableList()

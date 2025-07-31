@@ -18,7 +18,7 @@ class UserRepo @Inject constructor(
         return userRemoteDataSource.getAllUsers()
     }
 
-    fun currentUserIdFlow() = userDao.getCurrentUserIdFlow()
+    fun currentUserFlow() = userDao.getCurrentUserFlow()
 
     suspend fun getUser() = userDao.getCurrentUser()
 

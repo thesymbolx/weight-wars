@@ -21,5 +21,5 @@ data class User(
 data class Friend(
     @PrimaryKey val friendId: Long = 0,
     val name: String,
-    val userParentId: Long
+    val userParentId: Long = -1
 )
