@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -41,40 +42,20 @@ data class FriendState(
 
 @HiltViewModel
 class ChallengeCreationViewModel @Inject constructor(
-    val activeChallengeRepo: ActiveChallengeRepo,
-    val challengeRepo: ChallengeRepo,
-    userRepo: UserRepo
+    private val activeChallengeRepo: ActiveChallengeRepo,
+    private val challengeRepo: ChallengeRepo,
+    private val userRepo: UserRepo
 ) : ViewModel() {
     val challenges = mutableSetOf<Challenge>()
 
     private val _uiState = MutableStateFlow(ChallengeCreationUiState())
 
-    val uiState = userRepo.currentUserFlow().flatMapLatest { currentUserId ->
-        val currentUserId = currentUserId?.userId
+    val uiState = _uiState.asStateFlow()
 
-        if(currentUserId != null) {
-            combine(_uiState, userRepo.getFriends(currentUserId)) { uiState, friend ->
-                val friendsList = uiState.friends.toMutableList()
-
-                friendsList.add(
-                    FriendState(
-                        name = friend.name,
-                        isSelected = false,
-                    )
-                )
-
-                uiState.copy(
-                    friends = friendsList
-                )
-            }
-        } else  {
-            _uiState.map { it.copy(friends = emptyList()) }
-        }
-    }.stateIn(
-        viewModelScope,
-        started = WhileSubscribed(5_000),
-        initialValue = ChallengeCreationUiState()
-    )
+    fun getFriends() = viewModelScope.launch(Dispatchers.IO) {
+        val currentUser = userRepo.getCurrentUser()
+       // val friends = userRepo.getFriends()
+    }
 
     fun addChallenge(challengeId: Long) = viewModelScope.launch {
         val challenge: Challenge = with(Dispatchers.IO) {

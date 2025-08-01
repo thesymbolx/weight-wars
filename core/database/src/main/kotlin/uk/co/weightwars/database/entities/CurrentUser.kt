@@ -5,15 +5,15 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 
-data class UserWithFriend(
-    @Embedded val user: User,
-    @Relation(parentColumn = "userId", entityColumn = "friendId")
+data class CurrentUser(
+    @Embedded val profile: Profile,
+    @Relation(parentColumn = "profileId", entityColumn = "friendId")
     val friends: List<Friend>
 )
 
 @Entity
-data class User(
-    @PrimaryKey val userId: Long = 0,
+data class Profile(
+    @PrimaryKey val profileId: Long = 0,
     val name: String,
 )
 
@@ -21,5 +21,5 @@ data class User(
 data class Friend(
     @PrimaryKey val friendId: Long = 0,
     val name: String,
-    val userParentId: Long = -1
+    val profileParentId: Long = -1
 )

@@ -6,35 +6,33 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import uk.co.weightwars.database.entities.CurrentUser
 import uk.co.weightwars.database.entities.Friend
-import uk.co.weightwars.database.entities.User
-import uk.co.weightwars.database.entities.UserWithFriend
+import uk.co.weightwars.database.entities.Profile
 
 @Dao
 interface UserDao {
     @Transaction
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertFriends(userWithFriend: UserWithFriend) {
-        val userId = insertUser(userWithFriend.user)
+    suspend fun insertCurrentUser(currentUser: CurrentUser) {
+        val userId = insertProfile(currentUser.profile)
 
-        val friends = userWithFriend.friends.map {
-            it.copy(
-                userParentId = userId
-            )
+        val friends = currentUser.friends.map {
+            it.copy(profileParentId = userId)
         }
 
         insertFriends(friends)
     }
 
-    @Query("SELECT * FROM user LIMIT 1")
-    suspend fun getCurrentUser() : UserWithFriend?
+    @Query("SELECT * FROM profile LIMIT 1")
+    suspend fun getCurrentUser() : CurrentUser?
 
-    @Query("SELECT * FROM user LIMIT 1")
-    fun getCurrentUserFlow(): Flow<User?>
+    @Query("SELECT * FROM profile LIMIT 1")
+    fun getCurrentUserAsFlow() : Flow<CurrentUser?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFriends(friends: List<Friend>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertUser(user: User): Long
+    suspend fun insertProfile(profile: Profile): Long
 }

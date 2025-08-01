@@ -14,7 +14,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -35,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import uk.co.weightwars.challenges.R
 import uk.co.weightwars.designsystem.WeightWarsTheme
-import uk.co.weightwars.network.model.NetworkUser
+import uk.co.weightwars.network.model.User
 import uk.co.weightwars.ui.parallaxLayoutModifier
 
 
@@ -76,7 +75,7 @@ fun ChallengeCreationScreen(
     addChallengeClick: () -> Unit,
     onSave: () -> Unit,
     onBack: () -> Unit,
-    onFriendToggle: (NetworkUser) -> Unit
+    onFriendToggle: (User) -> Unit
 ) {
     val scrollState = rememberScrollState()
 
@@ -181,7 +180,7 @@ private fun AddChallenge(
 @Composable
 private fun FriendsList(
     friends: List<FriendState>,
-    onFriendToggle: (NetworkUser) -> Unit
+    onFriendToggle: (User) -> Unit
 ) {
     Column(
         modifier = Modifier.padding(horizontal = 16.dp)

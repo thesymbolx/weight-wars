@@ -8,23 +8,23 @@ import com.google.firebase.database.getValue
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import uk.co.weightwars.network.model.NetworkUser
+import uk.co.weightwars.network.model.User
 import javax.inject.Inject
 
 class UserRemoteDataSource @Inject constructor(
     private val firebaseDatabase: DatabaseReference
 ) {
-    fun setUser(user: NetworkUser) {
+    fun setUser(user: User) {
         firebaseDatabase.child("users").child("${user.id}").setValue(user)
     }
 
-    fun getAllUsers(): Flow<NetworkUser> = callbackFlow {
+    fun getAllUsers(): Flow<User> = callbackFlow {
         val listener = object : ChildEventListener {
             override fun onChildAdded(
                 snapshot: DataSnapshot,
                 previousChildName: String?
             ) {
-                val friend = snapshot.getValue<NetworkUser>()
+                val friend = snapshot.getValue<User>()
                 if(friend != null) trySend(friend)
             }
 
@@ -32,7 +32,7 @@ class UserRemoteDataSource @Inject constructor(
                 snapshot: DataSnapshot,
                 previousChildName: String?
             ) {
-                val friend = snapshot.getValue<NetworkUser>()
+                val friend = snapshot.getValue<User>()
                 if(friend != null) trySend(friend)
             }
 

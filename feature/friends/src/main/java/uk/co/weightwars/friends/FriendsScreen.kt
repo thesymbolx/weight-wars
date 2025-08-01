@@ -20,6 +20,9 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,48 +30,52 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import uk.co.weightwars.network.model.NetworkUser
 import kotlin.collections.forEach
 
 
 @Composable
 fun FriendsScreen(friendsViewModel: FriendsViewModel = hiltViewModel()) {
-    val uiState by friendsViewModel.uiState.collectAsStateWithLifecycle()
+    val uiState = friendsViewModel.uiState
 
     LaunchedEffect(Unit) {
         friendsViewModel.init()
     }
 
     Column {
+        CurrentUserName(uiState.name, friendsViewModel::saveCurrentUserName)
 
+        Spacer(modifier = Modifier.height(50.dp))
+
+        FriendsList(uiState.users) { friendId ->
+            friendsViewModel.toggleFriend(friendId)
+        }
+    }
+}
+
+@Composable
+private fun CurrentUserName(
+    name: String,
+    onSaveUserName: (String) -> Unit
+) {
+    var userName by remember(name) {
+        mutableStateOf(name)
+    }
+
+    Column {
         TextField(
             modifier = Modifier.fillMaxWidth(),
-            value = uiState.name,
-            onValueChange = { friendsViewModel.onNameChange(it) },
+            value = userName,
+            onValueChange = { userName = it },
             label = { Text("Enter your name") }
         )
         Button(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp),
-            enabled = uiState.name.isNotEmpty(),
-            onClick = { friendsViewModel.saveUser() }
+            enabled = userName.isNotEmpty(),
+            onClick = { onSaveUserName(userName) }
         ) {
             Text("Save")
-        }
-
-        Spacer(modifier = Modifier.height(50.dp))
-
-        if (uiState.name.isNotEmpty()) {
-            FriendsList(uiState.users) { friendId ->
-                friendsViewModel.toggleFriend(friendId)
-            }
-        } else {
-            Text(
-                text = "Enter name to see friends",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
         }
     }
 }
@@ -120,7 +127,7 @@ private fun FriendCard(
             .clickable(onClick = onToggle),
         colors = androidx.compose.material3.CardDefaults.cardColors(
             containerColor = if (isSelected) {
-                Color(0xFFFFE082) // Deeper gold color
+                Color(0xFFFFE082)
             } else {
                 MaterialTheme.colorScheme.surface
             }

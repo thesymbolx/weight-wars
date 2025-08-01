@@ -11,7 +11,7 @@ import uk.co.weightwars.database.entities.Challenge
 import uk.co.weightwars.database.entities.ChallengeCategory
 import uk.co.weightwars.database.entities.ChallengeInfo
 import uk.co.weightwars.database.entities.Friend
-import uk.co.weightwars.database.entities.User
+import uk.co.weightwars.database.entities.Profile
 
 @Database(
     entities = [
@@ -19,7 +19,7 @@ import uk.co.weightwars.database.entities.User
         ChallengeCategory::class,
         ChallengeInfo::class,
         ActiveChallengeItem::class,
-        User::class,
+        Profile::class,
         Friend::class
     ],
     version = 1

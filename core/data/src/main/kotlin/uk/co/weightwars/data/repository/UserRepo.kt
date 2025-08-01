@@ -1,36 +1,36 @@
 package uk.co.weightwars.data.repository
 
-import kotlinx.coroutines.flow.Flow
 import uk.co.weightwars.database.dao.UserDao
-import uk.co.weightwars.database.entities.UserWithFriend
+import uk.co.weightwars.database.entities.CurrentUser
 import uk.co.weightwars.network.datasource.UserRemoteDataSource
 import javax.inject.Inject
-import uk.co.weightwars.network.model.NetworkUser
+import uk.co.weightwars.network.model.User
 import kotlin.random.Random
 
 class UserRepo @Inject constructor(
     private val userDao: UserDao,
     private val userRemoteDataSource: UserRemoteDataSource
 ) {
-     fun getAllUsers() = userRemoteDataSource.getAllUsers()
+    suspend fun getCurrentUser() = userDao.getCurrentUser()
 
-     fun getFriends(userId: Long): Flow<NetworkUser> {
-        return userRemoteDataSource.getAllUsers()
-    }
+    fun getCurrentUserAsFlow() = userDao.getCurrentUserAsFlow()
 
-    fun currentUserFlow() = userDao.getCurrentUserFlow()
+    suspend fun saveCurrentUser(currentUser: CurrentUser) {
+        val dbUser = userDao.getCurrentUser()
+        val user = if(dbUser == null) {
+            currentUser.copy(profile = currentUser.profile.copy(profileId = Random.nextLong()))
+        } else currentUser
 
-    suspend fun getUser() = userDao.getCurrentUser()
+        userDao.insertCurrentUser(user)
 
-    suspend fun saveUser(userWithFriend: UserWithFriend) {
-        var dbUser = userDao.getCurrentUser()
-        var user = if(dbUser == null) {
-            userWithFriend.copy(user = userWithFriend.user.copy(userId = Random.nextLong()))
-        } else userWithFriend
+        val networkUser = User(
+            id = user.profile.profileId,
+            name = user.profile.name,
+            friends = user.friends.map { it.friendId }
+        )
 
-        userDao.insertFriends(user)
-
-        val networkUser = NetworkUser(id = user.user.userId, name = user.user.name, friends = user.friends.map { it.friendId })
         userRemoteDataSource.setUser(networkUser)
     }
+
+    fun getAllUsers() = userRemoteDataSource.getAllUsers()
 } 

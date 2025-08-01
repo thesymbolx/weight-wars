@@ -1,18 +1,23 @@
 package uk.co.weightwars.friends
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import uk.co.weightwars.data.repository.UserRepo
+import uk.co.weightwars.database.entities.CurrentUser
 import uk.co.weightwars.database.entities.Friend
+import uk.co.weightwars.database.entities.Profile
 import javax.inject.Inject
 
 data class FriendsUiState(
@@ -30,97 +35,86 @@ data class UserState(
 class FriendsViewModel @Inject constructor(
     private val userRepo: UserRepo
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(FriendsUiState())
-    val uiState = _uiState.asStateFlow()
+
+    var uiState by mutableStateOf(FriendsUiState())
+        private set
+
+    private var dataLoadingJob: Job? = null
+
 
     fun init() {
-        loadUsers()
-    }
-
-    private fun loadUsers() = viewModelScope.launch {
-       // val currentUser = userRepo.getUser()
-        //  val currentUserId = currentUser?.user?.userId
-
-
-        combine(userRepo.currentUserFlow(), userRepo.getAllUsers()) { currentUser, networkUser ->
-              val currentUserId = currentUser?.userId
-
-            if (currentUserId != null && networkUser.id != currentUserId) {
-                _uiState.update { currentState ->
-                    val newUser = UserState(
-                        id = networkUser.id,
-                        name = networkUser.name,
-                        isSelected = false
-                    )
-                    currentState.copy(
-                        name = currentUser.name,
-                        users = currentState.users + newUser
-                    )
-                }
-            }
-        }.collect()
-
-
-//        userRepo.getAllUsers().collect { user ->
-//            if (currentUserId != null && user.id != currentUserId) {
-//                _uiState.update { currentState ->
-//                    val newUser = UserState(
-//                        id = user.id,
-//                        name = user.name,
-//                        isSelected = false
-//                    )
-//                    currentState.copy(
-//                        userName = currentUser.user.name,
-//                        users = currentState.users + newUser
-//                    )
-//                }
-//            }
-//        }
-    }
-
-    fun onNameChange(newName: String) {
-        _uiState.update {
-            it.copy(name = newName)
+        if (dataLoadingJob?.isActive == true) {
+            return
         }
+
+        dataLoadingJob = viewModelScope.launch {
+            userRepo.getCurrentUserAsFlow()
+                .flatMapLatest { currentUser ->
+                    if (currentUser == null) {
+                        return@flatMapLatest flowOf(FriendsUiState(name = "", users = emptySet()))
+                    }
+
+                    val currentUserName = currentUser.profile.name
+                    val currentUserId = currentUser.profile.profileId
+
+                    userRepo.getAllUsers()
+                        .filter { networkUser -> networkUser.id != currentUserId }
+                        .map { networkUser ->
+                            val isFriend =
+                                currentUser.friends.any { friend -> friend.friendId == networkUser.id }
+                            UserState(
+                                id = networkUser.id,
+                                name = networkUser.name,
+                                isSelected = isFriend
+                            )
+                        }
+                        .scan(emptySet<UserState>()) { accumulatedUsers, newUserState ->
+                            accumulatedUsers + newUserState
+                        }
+                        .map { setOfOtherUsers -> // Create the final FriendsUiState for this emission
+                            FriendsUiState(name = currentUserName, users = setOfOtherUsers)
+                        }
+                }
+                .collect { newState ->
+                    uiState = newState
+                }
+        }
+    }
+
+    fun saveCurrentUserName(newName: String) = viewModelScope.launch(Dispatchers.IO) {
+        val currentUser =
+            userRepo.getCurrentUser() ?: CurrentUser(Profile(name = newName), emptyList())
+        val profile = currentUser.profile
+        val profileWithNewName = profile.copy(name = newName)
+        val userWithNewName = currentUser.copy(profile = profileWithNewName)
+        userRepo.saveCurrentUser(userWithNewName)
     }
 
     fun toggleFriend(newFriend: UserState) = viewModelScope.launch(Dispatchers.IO) {
         val friendId = newFriend.id
-        val currentUser = userRepo.getUser()
+        val currentUser = userRepo.getCurrentUser() ?: return@launch
+        val friends = currentUser.friends.toMutableList()
 
-        if (currentUser != null) {
-            val friends = currentUser.friends.toMutableList()
+        val oldFriend = friends.firstOrNull { it.friendId == friendId }
 
-            withContext(Dispatchers.Main) {
-                _uiState.update { currentState ->
-                    val updatedUsers = currentState.users.map { user ->
-                        if (user.id == friendId) {
-                            user.copy(isSelected = !user.isSelected)
-                        } else {
-                            user
-                        }
-                    }
-                    currentState.copy(users = updatedUsers.toSet())
-                }
-            }
-
-            friends?.add(Friend(friendId = newFriend.id, name = newFriend.name))
-
-            val currentUserWithFriend = currentUser.copy(
-                friends = friends
+         if(oldFriend != null) {
+            friends.remove(oldFriend)
+        } else {
+            friends.add(
+                Friend(
+                    friendId = newFriend.id,
+                    name = newFriend.name
+                )
             )
-
-            userRepo.saveUser(currentUserWithFriend)
         }
+
+        val currentUserWithFriend = currentUser.copy(
+            friends = friends
+        )
+
+        userRepo.saveCurrentUser(currentUserWithFriend)
     }
 
-    fun saveUser() = viewModelScope.launch {
-        val user = userRepo.getUser()
-        val name = _uiState.value.name
 
-        //   val userWithName = user?.copy(user = user.user.copy(name = name)) ?: UserWithFriend(user = User(name), friends = emptyList<>())
-
-        //   userRepo.saveUser(userWithName)
-    }
 
 }
