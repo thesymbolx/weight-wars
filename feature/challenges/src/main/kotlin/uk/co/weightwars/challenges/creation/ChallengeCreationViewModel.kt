@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uk.co.weightwars.data.models.ActiveChallenge
+import uk.co.weightwars.data.models.SubChallenge
 import uk.co.weightwars.data.repository.ActiveChallengeRepo
 import uk.co.weightwars.data.repository.ChallengeRepo
 import uk.co.weightwars.data.repository.UserRepo
@@ -111,17 +113,16 @@ class ChallengeCreationViewModel @Inject constructor(
 
         with(Dispatchers.IO) {
             activeChallengeRepo.updateActiveChallenge(
-                ActiveChallengeEntity(
-                    challengeInfoEntity = ChallengeInfoEntity(
-                        title = challenges.joinToString(separator = ", ") { it.title },
-                        startDate = LocalDate.now(),
-                        days = activeChallengeLength,
-                        isHardcoreMode = hardCoreMode,
-                    ),
-                    activeChallengeItemEntities = challenges.map {
-                        ActiveChallengeItemEntity(
-                            title = it.title,
-                            lengthInDays = it.days
+                ActiveChallenge(
+                    title = challenges.joinToString(separator = ", ") { it.title },
+                    startDate = LocalDate.now(),
+                    days = activeChallengeLength,
+                    isHardcoreMode = hardCoreMode,
+                    subChallenges = challenges.map { challenge ->
+                        SubChallenge(
+                            subChallengeId = challenge.challengeId,
+                            title = challenge.title,
+                            lengthInDays = challenge.days
                         )
                     }
                 )

@@ -1,13 +1,14 @@
 package uk.co.weightwars.data.repository
 
+import uk.co.weightwars.data.models.ActiveChallenge
 import uk.co.weightwars.database.dao.ActiveChallengeDao
 import uk.co.weightwars.database.entities.ActiveChallengeEntity
-import uk.co.weightwars.network.datasource.UserRemoteDataSource
+import uk.co.weightwars.network.datasource.ActiveChallengeDataSource
 import javax.inject.Inject
 
 class ActiveChallengeRepo @Inject constructor(
     private val activeChallengeDao: ActiveChallengeDao,
-    private val userRemoteDataSource: UserRemoteDataSource
+    private val activeChallengeDataSource: ActiveChallengeDataSource
 ) {
     fun getActiveChallenge(id: Long) =
         activeChallengeDao.getById(id)
@@ -18,9 +19,7 @@ class ActiveChallengeRepo @Inject constructor(
     suspend fun deleteActiveChallenge(challenge: ActiveChallengeEntity) =
         activeChallengeDao.delete(challenge)
 
-    suspend fun updateActiveChallenge(challenge: ActiveChallengeEntity) {
-        activeChallengeDao.insert(challenge)
-
-
+    suspend fun updateActiveChallenge(activeChallenge: ActiveChallenge) {
+        activeChallengeDataSource.saveActiveChallenge(activeChallenge.toNetworkChallenge())
     }
 }

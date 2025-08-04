@@ -93,29 +93,29 @@ class ActiveChallengeViewModel @Inject constructor(
     }
 
     fun score(challengeId: Long, date: LocalDate) = viewModelScope.launch(Dispatchers.IO) {
-        val scoredFullMark = date == LocalDate.now()
-        val challengeItems = activeChallengeEntity.activeChallengeItemEntities.toMutableList()
-        var challengeItem = challengeItems.first { challengeId == it.activeChallengeItemId }
-        val scores = challengeItem.scoreEntities.toMutableSet()
-
-        scores.add(
-            ScoreEntity(
-                localDate = date,
-                score = if (scoredFullMark) 20 else 10,
-                mark = if (scoredFullMark) ScoreMark.FULL else ScoreMark.HALF
-            )
-        )
-
-        challengeItem = challengeItem.copy(
-            scoreEntities = scores
-        )
-
-        challengeItems.add(challengeItem)
-
-        activeChallengeEntity = activeChallengeEntity.copy(
-            activeChallengeItemEntities = challengeItems
-        )
-
-        activeChallengeRepo.updateActiveChallenge(activeChallengeEntity)
+//        val scoredFullMark = date == LocalDate.now()
+//        val challengeItems = activeChallengeEntity.activeChallengeItemEntities.toMutableList()
+//        var challengeItem = challengeItems.first { challengeId == it.activeChallengeItemId }
+//        val scores = challengeItem.scoreEntities.toMutableSet()
+//
+//        scores.add(
+//            ScoreEntity(
+//                localDate = date,
+//                score = if (scoredFullMark) 20 else 10,
+//                mark = if (scoredFullMark) ScoreMark.FULL else ScoreMark.HALF
+//            )
+//        )
+//
+//        challengeItem = challengeItem.copy(
+//            scoreEntities = scores
+//        )
+//
+//        challengeItems.add(challengeItem)
+//
+//        activeChallengeEntity = activeChallengeEntity.copy(
+//            activeChallengeItemEntities = challengeItems
+//        )
+//
+//        activeChallengeRepo.updateActiveChallenge(activeChallengeEntity)
     }
 }

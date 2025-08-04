@@ -1,7 +1,6 @@
 package uk.co.weightwars.data.models
 
 import uk.co.weightwars.network.model.NetworkActiveChallenge
-import uk.co.weightwars.network.model.NetworkActiveChallengeItem
 import java.time.LocalDate
 import kotlin.String
 
@@ -11,10 +10,23 @@ data class ActiveChallenge(
     val startDate: LocalDate,
     val days: Int,
     val isHardcoreMode: Boolean,
-)
+    val participantsIds: List<String> = listOf(),
+    val subChallenges: List<SubChallenge>
+) {
+    fun toNetworkChallenge() =
+        NetworkActiveChallenge(
+            id = "",
+            title = this.title,
+            startDate = this.startDate.toString(),
+            days = this.days,
+            isHardcoreMode = this.isHardcoreMode,
+            participantsIds = listOf(),
+            subChallengeIds = this.subChallenges.map { it.subChallengeId }
+        )
+}
 
-data class ActiveChallengeItem(
-    val activeChallengeItemId: Long = -1,
+data class SubChallenge(
+    val subChallengeId: Long,
     val title: String,
     val scores: Set<Score> = emptySet(),
     val lengthInDays: Int
@@ -46,14 +58,4 @@ enum class ScoreMark {
     NONE
 }
 
-fun ActiveChallenge.activeChallengeToNetworkChallenge(id: String) {
-    NetworkActiveChallenge(
-        id = "",
-        title = this.title,
-        startDate = this.startDate.toString(),
-        days = this.days,
-        isHardcoreMode = this.isHardcoreMode,
-        participantsIds = listOf(),
-        networkActiveChallengeItem = listOf()
-    )
-}
+
