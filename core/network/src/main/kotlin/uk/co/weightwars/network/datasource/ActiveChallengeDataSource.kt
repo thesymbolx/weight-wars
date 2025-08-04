@@ -20,6 +20,10 @@ class ActiveChallengeDataSource @Inject constructor(
         val childUpdates = hashMapOf<String, Any>(
             "/$activeChallengeChild/$activeChallengeKey" to challengeWithId.toMap(),
         )
+        networkActiveChallenge.participantsIds.forEach { participantId ->
+            val userActiveChallengePath = "/$usersChild/${participantId}/activeChallenges"
+            childUpdates.put(userActiveChallengePath, activeChallengeKey)
+        }
 
         firebaseDatabase.updateChildren(childUpdates)
 
