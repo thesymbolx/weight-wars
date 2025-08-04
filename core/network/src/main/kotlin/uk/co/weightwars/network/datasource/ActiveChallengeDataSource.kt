@@ -1,6 +1,8 @@
 package uk.co.weightwars.network.datasource
 
 import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ktx.getValue
+import kotlinx.coroutines.tasks.await
 import jakarta.inject.Inject
 import uk.co.weightwars.network.model.NetworkActiveChallenge
 
@@ -20,11 +22,15 @@ class ActiveChallengeDataSource @Inject constructor(
         val childUpdates = hashMapOf<String, Any>(
             "/$activeChallengeChild/$activeChallengeKey" to challengeWithId.toMap(),
         )
-        networkActiveChallenge.participantsIds.forEach { participantId ->
+        for (participantId in networkActiveChallenge.participantsIds) {
             val userActiveChallengePath = "/$usersChild/${participantId}/activeChallenges"
-            childUpdates.put(userActiveChallengePath, activeChallengeKey)
-        }
+            val existingActiveChallengesSnapshot = firebaseDatabase.child(userActiveChallengePath).get().await()
+            val existingActiveChallenges = existingActiveChallengesSnapshot.getValue<List<String>>()?.toMutableList()
+                ?: mutableListOf()
 
+            existingActiveChallenges.add(activeChallengeKey)
+            childUpdates[userActiveChallengePath] = existingActiveChallenges
+        }
         firebaseDatabase.updateChildren(childUpdates)
 
         return activeChallengeKey
