@@ -17,11 +17,15 @@ interface UserDao {
     suspend fun insertCurrentUser(currentUser: CurrentUser) {
         val userId = insertProfile(currentUser.profile)
 
-        val friends = currentUser.friends.map {
+        val newFriends = currentUser.friends.map {
             it.copy(profileParentId = userId)
         }
 
-        insertFriends(friends)
+        val existingFriends = getFriendsByProfileParentId(userId)
+        val friendsToRemove = existingFriends.filterNot { existingFriend -> newFriends.any { it.friendId == existingFriend.friendId } }
+        deleteFriends(friendsToRemove)
+
+        insertFriends(newFriends)
     }
 
     @Query("SELECT * FROM profile LIMIT 1")
@@ -35,4 +39,10 @@ interface UserDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProfile(profile: Profile): Long
+
+    @Query("SELECT * FROM friend WHERE profileParentId = :profileParentId")
+    suspend fun getFriendsByProfileParentId(profileParentId: Long): List<Friend>
+
+    @androidx.room.Delete
+    suspend fun deleteFriends(friends: List<Friend>)
 }

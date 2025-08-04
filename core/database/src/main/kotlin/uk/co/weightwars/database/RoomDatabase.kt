@@ -6,10 +6,10 @@ import androidx.room.TypeConverters
 import uk.co.weightwars.database.dao.ActiveChallengeDao
 import uk.co.weightwars.database.dao.ChallengeDao
 import uk.co.weightwars.database.dao.UserDao
-import uk.co.weightwars.database.entities.ActiveChallengeItem
+import uk.co.weightwars.database.entities.ActiveChallengeItemEntity
 import uk.co.weightwars.database.entities.Challenge
 import uk.co.weightwars.database.entities.ChallengeCategory
-import uk.co.weightwars.database.entities.ChallengeInfo
+import uk.co.weightwars.database.entities.ChallengeInfoEntity
 import uk.co.weightwars.database.entities.Friend
 import uk.co.weightwars.database.entities.Profile
 
@@ -17,8 +17,8 @@ import uk.co.weightwars.database.entities.Profile
     entities = [
         Challenge::class,
         ChallengeCategory::class,
-        ChallengeInfo::class,
-        ActiveChallengeItem::class,
+        ChallengeInfoEntity::class,
+        ActiveChallengeItemEntity::class,
         Profile::class,
         Friend::class
     ],

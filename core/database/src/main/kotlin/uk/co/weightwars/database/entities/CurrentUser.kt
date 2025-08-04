@@ -7,7 +7,7 @@ import androidx.room.Relation
 
 data class CurrentUser(
     @Embedded val profile: Profile,
-    @Relation(parentColumn = "profileId", entityColumn = "friendId")
+    @Relation(parentColumn = "profileId", entityColumn = "profileParentId")
     val friends: List<Friend>
 )
 

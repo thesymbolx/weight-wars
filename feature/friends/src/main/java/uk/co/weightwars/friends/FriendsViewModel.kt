@@ -8,11 +8,13 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uk.co.weightwars.data.repository.UserRepo
 import uk.co.weightwars.database.entities.CurrentUser
@@ -36,50 +38,37 @@ class FriendsViewModel @Inject constructor(
     private val userRepo: UserRepo
 ) : ViewModel() {
 
-    var uiState by mutableStateOf(FriendsUiState())
-        private set
+    var uiState = userRepo.getCurrentUserAsFlow()
+        .flatMapLatest { currentUser ->
+            if (currentUser == null) {
+                return@flatMapLatest flowOf(FriendsUiState(name = "", users = emptySet()))
+            }
 
-    private var dataLoadingJob: Job? = null
+            val currentUserName = currentUser.profile.name
+            val currentUserId = currentUser.profile.profileId
 
-
-    fun init() {
-        if (dataLoadingJob?.isActive == true) {
-            return
-        }
-
-        dataLoadingJob = viewModelScope.launch {
-            userRepo.getCurrentUserAsFlow()
-                .flatMapLatest { currentUser ->
-                    if (currentUser == null) {
-                        return@flatMapLatest flowOf(FriendsUiState(name = "", users = emptySet()))
-                    }
-
-                    val currentUserName = currentUser.profile.name
-                    val currentUserId = currentUser.profile.profileId
-
-                    userRepo.getAllUsers()
-                        .filter { networkUser -> networkUser.id != currentUserId }
-                        .map { networkUser ->
-                            val isFriend =
-                                currentUser.friends.any { friend -> friend.friendId == networkUser.id }
-                            UserState(
-                                id = networkUser.id,
-                                name = networkUser.name,
-                                isSelected = isFriend
-                            )
-                        }
-                        .scan(emptySet<UserState>()) { accumulatedUsers, newUserState ->
-                            accumulatedUsers + newUserState
-                        }
-                        .map { setOfOtherUsers -> // Create the final FriendsUiState for this emission
-                            FriendsUiState(name = currentUserName, users = setOfOtherUsers)
-                        }
+            userRepo.getAllUsers()
+                .filter { networkUser -> networkUser.id != currentUserId }
+                .map { networkUser ->
+                    val isFriend =
+                        currentUser.friends.any { friend -> friend.friendId == networkUser.id }
+                    UserState(
+                        id = networkUser.id,
+                        name = networkUser.name,
+                        isSelected = isFriend
+                    )
                 }
-                .collect { newState ->
-                    uiState = newState
+                .scan(emptySet<UserState>()) { accumulatedUsers, newUserState ->
+                    accumulatedUsers + newUserState
                 }
-        }
-    }
+                .map { setOfOtherUsers ->
+                    FriendsUiState(name = currentUserName, users = setOfOtherUsers)
+                }
+        }.stateIn(
+            viewModelScope,
+            started = WhileSubscribed(5_000),
+            initialValue = FriendsUiState()
+        )
 
     fun saveCurrentUserName(newName: String) = viewModelScope.launch(Dispatchers.IO) {
         val currentUser =
@@ -97,7 +86,7 @@ class FriendsViewModel @Inject constructor(
 
         val oldFriend = friends.firstOrNull { it.friendId == friendId }
 
-         if(oldFriend != null) {
+        if (oldFriend != null) {
             friends.remove(oldFriend)
         } else {
             friends.add(
@@ -114,7 +103,4 @@ class FriendsViewModel @Inject constructor(
 
         userRepo.saveCurrentUser(currentUserWithFriend)
     }
-
-
-
 }

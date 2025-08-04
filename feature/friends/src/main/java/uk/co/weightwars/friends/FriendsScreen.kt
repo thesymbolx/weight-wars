@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
@@ -35,11 +37,7 @@ import kotlin.collections.forEach
 
 @Composable
 fun FriendsScreen(friendsViewModel: FriendsViewModel = hiltViewModel()) {
-    val uiState = friendsViewModel.uiState
-
-    LaunchedEffect(Unit) {
-        friendsViewModel.init()
-    }
+    val uiState by friendsViewModel.uiState.collectAsStateWithLifecycle()
 
     Column {
         CurrentUserName(uiState.name, friendsViewModel::saveCurrentUserName)
@@ -85,32 +83,36 @@ private fun FriendsList(
     friends: Set<UserState>,
     onFriendToggle: (UserState) -> Unit
 ) {
-    Column(
+    LazyColumn(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
-        Text(
-            text = stringResource(R.string.add_friends),
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        if (friends.isEmpty()) {
+        item {
             Text(
-                text = stringResource(R.string.no_friends_available),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = stringResource(R.string.add_friends),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 16.dp)
             )
-        } else {
-            friends.forEach { friend ->
-                FriendCard(
-                    friend = friend,
-                    isSelected = friend.isSelected,
-                    onToggle = {
-                        onFriendToggle(friend)
-                    }
+        }
+
+        item {
+            if (friends.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.no_friends_available),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(8.dp))
             }
+        }
+
+        items(items = friends.toList(), key = { it.id }) { friend ->
+            FriendCard(
+                friend = friend,
+                isSelected = friend.isSelected,
+                onToggle = {
+                    onFriendToggle(friend)
+                }
+            )
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }

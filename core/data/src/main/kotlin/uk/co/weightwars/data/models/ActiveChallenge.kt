@@ -1,31 +1,21 @@
-package uk.co.weightwars.database.entities
+package uk.co.weightwars.data.models
 
-import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import androidx.room.Relation
+import uk.co.weightwars.network.model.NetworkActiveChallenge
+import uk.co.weightwars.network.model.NetworkActiveChallengeItem
 import java.time.LocalDate
+import kotlin.String
 
 data class ActiveChallenge(
-    @Embedded val challengeInfo: ChallengeInfo,
-    @Relation(parentColumn = "challengeInfoId", entityColumn = "challengeInfoParentId")
-    val activeChallengeItems: List<ActiveChallengeItem>
-)
-
-@Entity
-data class ChallengeInfo(
-    @PrimaryKey(autoGenerate = true) val challengeInfoId: Long = 0,
+    val challengeInfoId: Long = -1,
     val title: String,
     val startDate: LocalDate,
     val days: Int,
     val isHardcoreMode: Boolean,
 )
 
-@Entity
 data class ActiveChallengeItem(
-    @PrimaryKey(autoGenerate = true) val activeChallengeItemId: Long = 0,
+    val activeChallengeItemId: Long = -1,
     val title: String,
-    val challengeInfoParentId: Long = 0,
     val scores: Set<Score> = emptySet(),
     val lengthInDays: Int
 )
@@ -54,4 +44,16 @@ enum class ScoreMark {
     FULL,
     HALF,
     NONE
+}
+
+fun ActiveChallenge.activeChallengeToNetworkChallenge(id: String) {
+    NetworkActiveChallenge(
+        id = "",
+        title = this.title,
+        startDate = this.startDate.toString(),
+        days = this.days,
+        isHardcoreMode = this.isHardcoreMode,
+        participantsIds = listOf(),
+        networkActiveChallengeItem = listOf()
+    )
 }

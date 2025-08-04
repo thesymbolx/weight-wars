@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uk.co.weightwars.data.repository.ActiveChallengeRepo
-import uk.co.weightwars.database.entities.ActiveChallenge
-import uk.co.weightwars.database.entities.Score
+import uk.co.weightwars.database.entities.ActiveChallengeEntity
+import uk.co.weightwars.database.entities.ScoreEntity
 import uk.co.weightwars.database.entities.ScoreMark
 import uk.co.weightwars.domain.ConsecutiveDateUseCase
 import java.time.LocalDate
@@ -44,24 +44,24 @@ class ActiveChallengeViewModel @Inject constructor(
     private val consecutiveDateUseCase: ConsecutiveDateUseCase,
     savedState: SavedStateHandle
 ) : ViewModel() {
-    lateinit var activeChallenge: ActiveChallenge
+    lateinit var activeChallengeEntity: ActiveChallengeEntity
 
     val id = savedState.get<Long>("activeChallengeId") ?: throw Exception()
 
     val uiState = activeChallengeRepo.getActiveChallenge(id).map { activeChallenge ->
-        this.activeChallenge = activeChallenge
+        this.activeChallengeEntity = activeChallenge
 
-        val challengeState = activeChallenge.activeChallengeItems.map { challenge ->
+        val challengeState = activeChallenge.activeChallengeItemEntities.map { challenge ->
             val consecutiveDate = consecutiveDateUseCase(
-                activeChallenge.challengeInfo.startDate,
+                activeChallenge.challengeInfoEntity.startDate,
                 challenge.lengthInDays
             )
 
             ChallengeState(
                 name = challenge.title,
-                totalScore = challenge.scores.sumOf { it.score },
+                totalScore = challenge.scoreEntities.sumOf { it.score },
                 challengeDate = consecutiveDate.map { date ->
-                    val score = challenge.scores.firstOrNull { it.localDate == date.localDate }
+                    val score = challenge.scoreEntities.firstOrNull { it.localDate == date.localDate }
 
                     ChallengeDayState(
                         id = challenge.activeChallengeItemId,
@@ -76,9 +76,9 @@ class ActiveChallengeViewModel @Inject constructor(
         }
 
         ActiveChallengeState(
-            name = activeChallenge.challengeInfo.title,
-            totalScore = activeChallenge.activeChallengeItems.sumOf { score ->
-                score.scores.sumOf { it.score }
+            name = activeChallenge.challengeInfoEntity.title,
+            totalScore = activeChallenge.activeChallengeItemEntities.sumOf { score ->
+                score.scoreEntities.sumOf { it.score }
             },
             challenges = challengeState
         )
@@ -89,17 +89,17 @@ class ActiveChallengeViewModel @Inject constructor(
     )
 
     fun deleteChallenge() = viewModelScope.launch(Dispatchers.IO) {
-        activeChallengeRepo.deleteActiveChallenge(activeChallenge)
+        activeChallengeRepo.deleteActiveChallenge(activeChallengeEntity)
     }
 
     fun score(challengeId: Long, date: LocalDate) = viewModelScope.launch(Dispatchers.IO) {
         val scoredFullMark = date == LocalDate.now()
-        val challengeItems = activeChallenge.activeChallengeItems.toMutableList()
+        val challengeItems = activeChallengeEntity.activeChallengeItemEntities.toMutableList()
         var challengeItem = challengeItems.first { challengeId == it.activeChallengeItemId }
-        val scores = challengeItem.scores.toMutableSet()
+        val scores = challengeItem.scoreEntities.toMutableSet()
 
         scores.add(
-            Score(
+            ScoreEntity(
                 localDate = date,
                 score = if (scoredFullMark) 20 else 10,
                 mark = if (scoredFullMark) ScoreMark.FULL else ScoreMark.HALF
@@ -107,15 +107,15 @@ class ActiveChallengeViewModel @Inject constructor(
         )
 
         challengeItem = challengeItem.copy(
-            scores = scores
+            scoreEntities = scores
         )
 
         challengeItems.add(challengeItem)
 
-        activeChallenge = activeChallenge.copy(
-            activeChallengeItems = challengeItems
+        activeChallengeEntity = activeChallengeEntity.copy(
+            activeChallengeItemEntities = challengeItems
         )
 
-        activeChallengeRepo.updateActiveChallenge(activeChallenge)
+        activeChallengeRepo.updateActiveChallenge(activeChallengeEntity)
     }
 }

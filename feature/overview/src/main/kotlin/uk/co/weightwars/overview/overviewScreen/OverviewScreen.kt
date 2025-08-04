@@ -18,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -62,11 +61,11 @@ private fun OverviewScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .clickable { onChallengeClick(it.challengeInfo.challengeInfoId) }
+                    .clickable { onChallengeClick(it.challengeInfoEntity.challengeInfoId) }
             ) {
                 Text(
                     modifier = Modifier.padding(16.dp),
-                    text = it.challengeInfo.title,
+                    text = it.challengeInfoEntity.title,
                     style = MaterialTheme.typography.headlineMedium
                 )
             }

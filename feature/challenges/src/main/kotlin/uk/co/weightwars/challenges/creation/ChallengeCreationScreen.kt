@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -21,6 +23,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,6 +31,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -65,7 +69,7 @@ fun ChallengeCreationScreen(
         addChallengeClick = addChallengeClick,
         onSave = viewModel::saveActiveChallenge,
         onBack = onBack,
-        onFriendToggle = {}
+        onFriendToggle = viewModel::toggleFriend
     )
 }
 
@@ -75,7 +79,7 @@ fun ChallengeCreationScreen(
     addChallengeClick: () -> Unit,
     onSave: () -> Unit,
     onBack: () -> Unit,
-    onFriendToggle: (User) -> Unit
+    onFriendToggle: (FriendState) -> Unit
 ) {
     val scrollState = rememberScrollState()
 
@@ -180,32 +184,35 @@ private fun AddChallenge(
 @Composable
 private fun FriendsList(
     friends: List<FriendState>,
-    onFriendToggle: (User) -> Unit
+    onFriendToggle: (FriendState) -> Unit
 ) {
-    Column(
-        modifier = Modifier.padding(horizontal = 16.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.invite_friends),
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        if (friends.isEmpty()) {
+    LazyColumn(modifier = Modifier.padding(horizontal = 16.dp)) {
+        item {
             Text(
-                text = stringResource(R.string.no_friends_available),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = stringResource(R.string.invite_friends),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 16.dp)
             )
-        } else {
-            friends.forEach { friend ->
-                FriendCard(
-                    friend = friend,
-                    isSelected = friend.isSelected,
-                    onToggle = {  }
+
+        }
+
+        item {
+            if (friends.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.no_friends_available),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(8.dp))
             }
+        }
+
+        items(items = friends, key = { it.id }) { friend ->
+            FriendCard(
+                friend = friend,
+                isSelected = friend.isSelected,
+                onToggle = onFriendToggle
+            )
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
@@ -214,15 +221,17 @@ private fun FriendsList(
 private fun FriendCard(
     friend: FriendState,
     isSelected: Boolean,
-    onToggle: () -> Unit
+    onToggle: (FriendState) -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onToggle),
+            .clickable(onClick = {
+                onToggle(friend)
+            }),
         colors = androidx.compose.material3.CardDefaults.cardColors(
             containerColor = if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
+                Color(0xFFFFE082)
             } else {
                 MaterialTheme.colorScheme.surface
             }
@@ -238,14 +247,26 @@ private fun FriendCard(
                 imageVector = Icons.Filled.Person,
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
-                tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                tint = if (isSelected) Color(0xFF3E2723) else MaterialTheme.colorScheme.onSurface
             )
-            
+
             Text(
                 text = friend.name,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(start = 12.dp),
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                color = if (isSelected) Color(0xFF3E2723) else MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Switch(
+                checked = isSelected,
+                onCheckedChange = { onToggle(friend) },
+                colors = androidx.compose.material3.SwitchDefaults.colors(
+                    checkedThumbColor = Color(0xFFF57F17),
+                    checkedTrackColor = Color(0xFFFFB74D),
+                    uncheckedBorderColor = MaterialTheme.colorScheme.primary
+                )
             )
         }
     }

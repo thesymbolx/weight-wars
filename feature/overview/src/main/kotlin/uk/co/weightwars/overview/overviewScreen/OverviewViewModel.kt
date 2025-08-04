@@ -7,11 +7,11 @@ import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import uk.co.weightwars.data.repository.ActiveChallengeRepo
-import uk.co.weightwars.database.entities.ActiveChallenge
+import uk.co.weightwars.database.entities.ActiveChallengeEntity
 import javax.inject.Inject
 
 data class OverviewUiState(
-    val challenges: List<ActiveChallenge> = emptyList()
+    val challenges: List<ActiveChallengeEntity> = emptyList()
 )
 
 @HiltViewModel
