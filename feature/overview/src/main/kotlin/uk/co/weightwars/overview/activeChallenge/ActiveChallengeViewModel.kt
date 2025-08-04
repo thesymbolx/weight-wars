@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import uk.co.weightwars.data.models.ActiveChallenge
 import uk.co.weightwars.data.models.ScoreMark
 import uk.co.weightwars.data.repository.ActiveChallengeRepo
 import uk.co.weightwars.database.entities.ActiveChallengeEntity
@@ -43,16 +44,16 @@ class ActiveChallengeViewModel @Inject constructor(
     private val consecutiveDateUseCase: ConsecutiveDateUseCase,
     savedState: SavedStateHandle
 ) : ViewModel() {
-    lateinit var activeChallengeEntity: ActiveChallengeEntity
+    lateinit var activeChallengeEntity: ActiveChallenge
 
     val id = savedState.get<Long>("activeChallengeId") ?: throw Exception()
 
     val uiState = activeChallengeRepo.getActiveChallenge(id).map { activeChallenge ->
         this.activeChallengeEntity = activeChallenge
 
-        val challengeState = activeChallenge.subChallengeEntity.map { challenge ->
+        val challengeState = activeChallenge.subChallenges.map { challenge ->
             val consecutiveDate = consecutiveDateUseCase(
-                activeChallenge.challengeInfoEntity.startDate,
+                activeChallenge.startDate,
                 challenge.lengthInDays
             )
 
@@ -63,7 +64,7 @@ class ActiveChallengeViewModel @Inject constructor(
                     val score = challenge.scores.firstOrNull { it.localDate == date.localDate }
 
                     ChallengeDayState(
-                        id = challenge.activeChallengeItemId,
+                        id = challenge.subChallengeId,
                         localDate = date.localDate,
                         formattedDate = date.formattedDate,
                         dayName = date.dayName,
@@ -75,9 +76,9 @@ class ActiveChallengeViewModel @Inject constructor(
         }
 
         ActiveChallengeState(
-            name = activeChallenge.challengeInfoEntity.title,
-            totalScore = activeChallenge.subChallenge.sumOf { score ->
-                score.scoreEntities.sumOf { it.score }
+            name = activeChallenge.title,
+            totalScore = activeChallenge.subChallenges.sumOf { score ->
+                score.scores.sumOf { it.score }
             },
             challenges = challengeState
         )
@@ -86,10 +87,6 @@ class ActiveChallengeViewModel @Inject constructor(
         started = WhileSubscribed(5_000),
         initialValue = ActiveChallengeState()
     )
-
-    fun deleteChallenge() = viewModelScope.launch(Dispatchers.IO) {
-        activeChallengeRepo.deleteActiveChallenge(activeChallengeEntity)
-    }
 
     fun score(challengeId: Long, date: LocalDate) = viewModelScope.launch(Dispatchers.IO) {
 //        val scoredFullMark = date == LocalDate.now()

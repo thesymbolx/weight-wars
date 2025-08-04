@@ -107,6 +107,7 @@ class ChallengeCreationViewModel @Inject constructor(
     fun saveActiveChallenge() = viewModelScope.launch {
         val activeChallengeLength = challenges.maxOf { it.days }
         val hardCoreMode = _uiState.value.isHardCordMode
+        val participants = _uiState.value.friends.filter { it.isSelected }
 
         with(Dispatchers.IO) {
             activeChallengeRepo.updateActiveChallenge(
@@ -115,7 +116,7 @@ class ChallengeCreationViewModel @Inject constructor(
                     startDate = LocalDate.now(),
                     days = activeChallengeLength,
                     isHardcoreMode = hardCoreMode,
-                    participantsIds = listOf(1, 3, 4),
+                    participants = participants.map { it.id },
                     subChallenges = challenges.map { challenge ->
                         SubChallenge(
                             subChallengeId = challenge.challengeId,
