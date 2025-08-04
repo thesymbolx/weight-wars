@@ -11,7 +11,7 @@ import uk.co.weightwars.overview.overviewScreen.OverviewScreen
 object OverviewRoute
 
 @Serializable
-data class ActiveChallengeRoute(val activeChallengeId: Long)
+data class ActiveChallengeRoute(val activeChallengeId: String)
 
 fun NavGraphBuilder.overviewNavGraph(navController: NavHostController) {
     composable<OverviewRoute> {

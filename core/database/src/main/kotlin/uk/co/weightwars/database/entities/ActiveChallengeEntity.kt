@@ -23,7 +23,7 @@ data class ParticipantEntity(
 
 @Entity
 data class ChallengeInfoEntity(
-    @PrimaryKey(autoGenerate = true) val challengeInfoId: Long = 0,
+    @PrimaryKey val challengeInfoId: String,
     val title: String,
     val startDate: LocalDate,
     val days: Int,

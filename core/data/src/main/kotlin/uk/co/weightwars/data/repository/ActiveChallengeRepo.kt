@@ -29,7 +29,7 @@ class ActiveChallengeRepo @Inject constructor(
 
     suspend fun createActiveChallenge(activeChallenge: ActiveChallenge) {
         val firebaseNodeKey = activeChallengeDataSource.createActiveChallenge(activeChallenge.toNetworkChallenge())
-
+        activeChallengeDao.insert(activeChallenge.toActiveChallengeEntity(firebaseNodeKey))
     }
 
     suspend fun updateActiveChallenge(activeChallenge: ActiveChallenge) {

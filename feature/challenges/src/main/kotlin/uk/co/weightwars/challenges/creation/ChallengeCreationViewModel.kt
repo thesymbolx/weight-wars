@@ -110,7 +110,7 @@ class ChallengeCreationViewModel @Inject constructor(
         val participants = _uiState.value.friends.filter { it.isSelected }
 
         with(Dispatchers.IO) {
-            activeChallengeRepo.updateActiveChallenge(
+            activeChallengeRepo.createActiveChallenge(
                 ActiveChallenge(
                     title = challenges.joinToString(separator = ", ") { it.title },
                     startDate = LocalDate.now(),

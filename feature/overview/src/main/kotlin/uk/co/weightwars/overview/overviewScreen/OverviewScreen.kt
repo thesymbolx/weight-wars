@@ -29,7 +29,7 @@ import uk.co.weightwars.ui.parallaxLayoutModifier
 @Composable
 fun OverviewScreen(
     viewModel: OverviewViewModel = hiltViewModel(),
-    onChallengeClick: (Long) -> Unit,
+    onChallengeClick: (String) -> Unit,
     onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -39,7 +39,7 @@ fun OverviewScreen(
 @Composable
 private fun OverviewScreen(
     uiState: OverviewUiState,
-    onChallengeClick: (Long) -> Unit,
+    onChallengeClick: (String) -> Unit,
     onBack: () -> Unit
 ) {
     val scrollState = rememberScrollState()

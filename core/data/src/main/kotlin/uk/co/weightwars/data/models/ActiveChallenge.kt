@@ -11,7 +11,7 @@ import java.time.LocalDate
 import kotlin.String
 
 data class ActiveChallenge(
-    val challengeInfoId: Long = -1,
+    val challengeInfoId: String = "",
     val title: String,
     val startDate: LocalDate,
     val days: Int,
@@ -30,9 +30,10 @@ data class ActiveChallenge(
             subChallengeIds = this.subChallenges.map { it.subChallengeId }
         )
 
-    fun toActiveChallengeEntity() =
+    fun toActiveChallengeEntity(challengeId: String) =
         ActiveChallengeEntity(
             challengeInfoEntity = ChallengeInfoEntity(
+                challengeInfoId = challengeId,
                 title = title,
                 startDate = startDate,
                 days = days,
