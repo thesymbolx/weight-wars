@@ -34,13 +34,13 @@ class Converters {
     }
 
     @TypeConverter
-    fun fromLocalDateList(scoredDate: Set<ScoreEntity>): String {
+    fun fromScoreList(scoredDate: List<ScoreEntity>): String {
         return gson.toJson(scoredDate)
     }
 
     @TypeConverter
-    fun toLocalDateSet(jsonString: String): Set<ScoreEntity> {
-        val listType = object : TypeToken<Set<ScoreEntity>>() {}.type
+    fun toScoreSet(jsonString: String): List<ScoreEntity> {
+        val listType = object : TypeToken<List<ScoreEntity>>() {}.type
         return gson.fromJson(jsonString, listType)
     }
 }

@@ -10,8 +10,10 @@ class ActiveChallengeRepo @Inject constructor(
     private val activeChallengeDao: ActiveChallengeDao,
     private val activeChallengeDataSource: ActiveChallengeDataSource
 ) {
-    fun getActiveChallenge(id: Long) =
+    fun getActiveChallenge(id: Long): ActiveChallenge {
         activeChallengeDao.getById(id)
+    }
+
 
     fun getActiveChallenges() =
         activeChallengeDao.getAllFlow()
@@ -20,6 +22,7 @@ class ActiveChallengeRepo @Inject constructor(
         activeChallengeDao.delete(challenge)
 
     suspend fun updateActiveChallenge(activeChallenge: ActiveChallenge) {
+        activeChallengeDao.insert(activeChallenge.toActiveChallengeEntity())
         activeChallengeDataSource.saveActiveChallenge(activeChallenge.toNetworkChallenge())
     }
 }

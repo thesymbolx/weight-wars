@@ -13,10 +13,7 @@ import uk.co.weightwars.data.models.SubChallenge
 import uk.co.weightwars.data.repository.ActiveChallengeRepo
 import uk.co.weightwars.data.repository.ChallengeRepo
 import uk.co.weightwars.data.repository.UserRepo
-import uk.co.weightwars.database.entities.ActiveChallengeEntity
-import uk.co.weightwars.database.entities.ActiveChallengeItemEntity
 import uk.co.weightwars.database.entities.Challenge
-import uk.co.weightwars.database.entities.ChallengeInfoEntity
 import java.time.LocalDate
 import javax.inject.Inject
 

@@ -9,12 +9,15 @@ import java.time.LocalDate
 data class ActiveChallengeEntity(
     @Embedded val challengeInfoEntity: ChallengeInfoEntity,
     @Relation(parentColumn = "challengeInfoId", entityColumn = "challengeInfoParentId")
-    val activeChallengeItemEntities: List<ActiveChallengeItemEntity>
+    val subChallenges: List<SubChallengeEntity>,
+    @Relation(parentColumn = "challengeInfoId", entityColumn = "challengeInfoParentId")
+    val participants: List<ParticipantEntity>
+
 )
 
 @Entity
-data class ActiveChallengeParticipantEntity(
-    val participantId: Long,
+data class ParticipantEntity(
+    @PrimaryKey(autoGenerate = true) val participantId: Long = 0,
     val challengeInfoParentId: Long = 0
 )
 
@@ -28,36 +31,16 @@ data class ChallengeInfoEntity(
 )
 
 @Entity
-data class ActiveChallengeItemEntity(
-    @PrimaryKey(autoGenerate = true) val activeChallengeItemId: Long = 0,
+data class SubChallengeEntity(
+    @PrimaryKey(autoGenerate = true) val subChallengeId: Long = 0,
     val title: String,
     val challengeInfoParentId: Long = 0,
-    val scoreEntities: Set<ScoreEntity> = emptySet(),
+    val scores: List<ScoreEntity>,
     val lengthInDays: Int
 )
 
 data class ScoreEntity(
     val localDate: LocalDate,
     val score: Int,
-    val mark: ScoreMark
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is ScoreEntity) return false
-        return localDate == other.localDate
-    }
-
-    override fun hashCode(): Int {
-        return localDate.hashCode()
-    }
-
-    override fun toString(): String {
-        return "ScoredDate(localDate=$localDate, score=$score, mark=$mark)"
-    }
-}
-
-enum class ScoreMark {
-    FULL,
-    HALF,
-    NONE
-}
+    val mark: String
+)

@@ -8,7 +8,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import uk.co.weightwars.database.entities.ActiveChallengeEntity
-import uk.co.weightwars.database.entities.ActiveChallengeItemEntity
+import uk.co.weightwars.database.entities.SubChallengeEntity
 import uk.co.weightwars.database.entities.ChallengeInfoEntity
 
 @Dao
@@ -30,7 +30,7 @@ interface ActiveChallengeDao {
     suspend fun insert(activeChallengeEntity: ActiveChallengeEntity) {
         val infoId = insert(activeChallengeEntity.challengeInfoEntity)
 
-        val activeChallengeItems = activeChallengeEntity.activeChallengeItemEntities.map {
+        val activeChallengeItems = activeChallengeEntity.subChallenges.map {
             it.copy(
                 challengeInfoParentId = infoId
             )
@@ -43,14 +43,14 @@ interface ActiveChallengeDao {
     @Delete
     suspend fun delete(challenge: ActiveChallengeEntity) {
         delete(challenge.challengeInfoEntity)
-        delete(challenge.activeChallengeItemEntities)
+        delete(challenge.subChallenges)
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(items: List<ActiveChallengeItemEntity>)
+    suspend fun insert(items: List<SubChallengeEntity>)
 
     @Delete
-    suspend fun delete(items: List<ActiveChallengeItemEntity>)
+    suspend fun delete(items: List<SubChallengeEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(items: ChallengeInfoEntity) : Long

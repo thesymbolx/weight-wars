@@ -8,6 +8,7 @@ class ActiveChallengeDataSource @Inject constructor(
     private val firebaseDatabase: DatabaseReference
 ) {
     val activeChallengeChild = "activeChallenge"
+    val usersChild = "users"
 
     suspend fun saveActiveChallenge(networkActiveChallenge: NetworkActiveChallenge) : NetworkActiveChallenge {
         val activeChallengeKey = firebaseDatabase.child(activeChallengeChild).push().key ?: throw Exception()

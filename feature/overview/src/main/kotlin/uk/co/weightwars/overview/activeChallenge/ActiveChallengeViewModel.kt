@@ -10,10 +10,9 @@ import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import uk.co.weightwars.data.models.ScoreMark
 import uk.co.weightwars.data.repository.ActiveChallengeRepo
 import uk.co.weightwars.database.entities.ActiveChallengeEntity
-import uk.co.weightwars.database.entities.ScoreEntity
-import uk.co.weightwars.database.entities.ScoreMark
 import uk.co.weightwars.domain.ConsecutiveDateUseCase
 import java.time.LocalDate
 
@@ -51,7 +50,7 @@ class ActiveChallengeViewModel @Inject constructor(
     val uiState = activeChallengeRepo.getActiveChallenge(id).map { activeChallenge ->
         this.activeChallengeEntity = activeChallenge
 
-        val challengeState = activeChallenge.activeChallengeItemEntities.map { challenge ->
+        val challengeState = activeChallenge.subChallengeEntity.map { challenge ->
             val consecutiveDate = consecutiveDateUseCase(
                 activeChallenge.challengeInfoEntity.startDate,
                 challenge.lengthInDays
@@ -59,9 +58,9 @@ class ActiveChallengeViewModel @Inject constructor(
 
             ChallengeState(
                 name = challenge.title,
-                totalScore = challenge.scoreEntities.sumOf { it.score },
+                totalScore = challenge.scores.sumOf { it.score },
                 challengeDate = consecutiveDate.map { date ->
-                    val score = challenge.scoreEntities.firstOrNull { it.localDate == date.localDate }
+                    val score = challenge.scores.firstOrNull { it.localDate == date.localDate }
 
                     ChallengeDayState(
                         id = challenge.activeChallengeItemId,
@@ -77,7 +76,7 @@ class ActiveChallengeViewModel @Inject constructor(
 
         ActiveChallengeState(
             name = activeChallenge.challengeInfoEntity.title,
-            totalScore = activeChallenge.activeChallengeItemEntities.sumOf { score ->
+            totalScore = activeChallenge.subChallenge.sumOf { score ->
                 score.scoreEntities.sumOf { it.score }
             },
             challenges = challengeState
