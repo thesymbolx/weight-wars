@@ -120,7 +120,7 @@ fun ChallengeCreationScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
             onClick = onSave,
-            enabled = challengeCreationUiState.selectedChallengeState.isNotEmpty()
+            enabled = challengeCreationUiState.saveEnabled
         ) {
             Text(
                 modifier = Modifier.padding(8.dp),

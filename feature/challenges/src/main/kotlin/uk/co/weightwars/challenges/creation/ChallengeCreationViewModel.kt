@@ -14,10 +14,12 @@ import uk.co.weightwars.data.repository.ActiveChallengeRepo
 import uk.co.weightwars.data.repository.ChallengeRepo
 import uk.co.weightwars.data.repository.UserRepo
 import uk.co.weightwars.database.entities.Challenge
+import uk.co.weightwars.database.entities.CurrentUser
 import java.time.LocalDate
 import javax.inject.Inject
 
 data class ChallengeCreationUiState(
+    val saveEnabled: Boolean = false,
     val isHardCordMode: Boolean = false,
     val selectedChallengeState: List<SelectedChallengeState> = emptyList(),
     val challengeSaved: Boolean = false,
@@ -46,12 +48,14 @@ class ChallengeCreationViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ChallengeCreationUiState())
     val uiState = _uiState.asStateFlow()
 
+    var currentUser: CurrentUser? = null
+
     init {
         getFriends()
     }
 
     fun getFriends() = viewModelScope.launch(Dispatchers.IO) {
-        val currentUser = userRepo.getCurrentUser()
+        currentUser = userRepo.getCurrentUser()
         val friends = currentUser?.friends ?: emptyList()
 
         _uiState.update {
@@ -76,6 +80,7 @@ class ChallengeCreationViewModel @Inject constructor(
 
         _uiState.update {
             it.copy(
+                saveEnabled = currentUser != null,
                 selectedChallengeState = challenges.map {
                     SelectedChallengeState(
                         id = it.challengeId,
