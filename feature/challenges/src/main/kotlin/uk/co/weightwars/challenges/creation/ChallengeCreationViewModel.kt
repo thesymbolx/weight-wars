@@ -118,6 +118,7 @@ class ChallengeCreationViewModel @Inject constructor(
                     startDate = LocalDate.now(),
                     days = activeChallengeLength,
                     isHardcoreMode = hardCoreMode,
+                    participantsIds = listOf(1, 3, 4),
                     subChallenges = challenges.map { challenge ->
                         SubChallenge(
                             subChallengeId = challenge.challengeId,

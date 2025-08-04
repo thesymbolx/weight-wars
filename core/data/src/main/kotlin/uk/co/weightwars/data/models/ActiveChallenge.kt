@@ -10,7 +10,7 @@ data class ActiveChallenge(
     val startDate: LocalDate,
     val days: Int,
     val isHardcoreMode: Boolean,
-    val participantsIds: List<String> = listOf(),
+    val participantsIds: List<Long>,
     val subChallenges: List<SubChallenge>
 ) {
     fun toNetworkChallenge() =
@@ -20,7 +20,7 @@ data class ActiveChallenge(
             startDate = this.startDate.toString(),
             days = this.days,
             isHardcoreMode = this.isHardcoreMode,
-            participantsIds = listOf(),
+            participantsIds = this.participantsIds,
             subChallengeIds = this.subChallenges.map { it.subChallengeId }
         )
 }
