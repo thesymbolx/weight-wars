@@ -21,8 +21,11 @@ class ActiveChallengeRepo @Inject constructor(
     }
 
 
-    fun getActiveChallenges() =
-        activeChallengeDao.getAllFlow()
+    suspend fun getActiveChallenges() {
+       val activeChallenges = activeChallengeDao.getAll()
+
+
+    }
 
     suspend fun deleteActiveChallenge(challenge: ActiveChallengeEntity) =
         activeChallengeDao.delete(challenge)
