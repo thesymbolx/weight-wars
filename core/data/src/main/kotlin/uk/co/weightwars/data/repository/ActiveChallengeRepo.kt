@@ -11,6 +11,8 @@ import uk.co.weightwars.database.dao.UserDao
 import uk.co.weightwars.database.entities.ActiveChallengeEntity
 import uk.co.weightwars.network.datasource.ActiveChallengeDataSource
 import uk.co.weightwars.network.model.FirebaseAction
+import uk.co.weightwars.network.model.FirebaseActiveChallenge
+import java.lang.Exception
 import javax.inject.Inject
 
 class ActiveChallengeRepo @Inject constructor(
@@ -26,13 +28,21 @@ class ActiveChallengeRepo @Inject constructor(
     }
 
     suspend fun getActiveChallenges() : Flow<String> {
-       val currentUserId = userDao.getCurrentUser()?.profile?.profileId ?: return flow { emit("null") }
+       val currentUserId = userDao.getCurrentUser()?.profile?.profileId ?: throw Exception("make work offline only")
 
-        //This flow returns activeChallengeIDs in a flow
-        activeChallengeDataSource.getUserActiveChallenges("$currentUserId")
-
-        //use the above ids here
-        activeChallengeDataSource.getActiveChallenges(/*id here*/)
+        return activeChallengeDataSource.getUserActiveChallenges("$currentUserId").flatMapLatest { userActiveChallengeIds ->
+            flow {
+                userActiveChallengeIds.forEach { userActiveChallengeId ->
+                    activeChallengeDataSource.getActiveChallenges(userActiveChallengeId).map { activeChallenge ->
+                        when(activeChallenge) {
+                            is FirebaseAction.Added -> emit(activeChallenge.data.toString())
+                            is FirebaseAction.Modified -> emit(activeChallenge.data.toString())
+                            is FirebaseAction.Removed<*> -> throw Exception()
+                        }
+                    }
+                }
+            }
+        }
     }
 
     suspend fun deleteActiveChallenge(challenge: ActiveChallengeEntity) =

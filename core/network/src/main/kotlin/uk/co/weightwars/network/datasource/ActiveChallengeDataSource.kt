@@ -4,6 +4,7 @@ import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.getValue
 import kotlinx.coroutines.tasks.await
 import jakarta.inject.Inject
@@ -49,45 +50,6 @@ class ActiveChallengeDataSource @Inject constructor(
                 previousChildName: String?
             ) {
                 val activeChallengeIds = snapshot.getValue<FirebaseActiveChallenge>()
-                trySend(FirebaseAction.Added(activeChallengeIds))
-            }
-
-            override fun onChildChanged(
-                snapshot: DataSnapshot,
-                previousChildName: String?
-            ) {
-                val activeChallengeIds = snapshot.getValue<FirebaseActiveChallenge>()
-                trySend(FirebaseAction.Modified(activeChallengeIds))
-            }
-
-            override fun onChildRemoved(snapshot: DataSnapshot) {
-                val activeChallengeIds = snapshot.getValue<FirebaseActiveChallenge>()
-                trySend(FirebaseAction.Removed(activeChallengeIds))
-            }
-
-            override fun onChildMoved(
-                snapshot: DataSnapshot,
-                previousChildName: String?
-            ) {}
-
-            override fun onCancelled(error: DatabaseError) {}
-
-        }
-
-        firebaseDatabase.child(activeChallengeChild).addChildEventListener(listener)
-
-        awaitClose {
-            firebaseDatabase.removeEventListener(listener)
-        }
-    }
-
-    fun getUserActiveChallenges(userId: String) = callbackFlow {
-        val listener = object : ChildEventListener {
-            override fun onChildAdded(
-                snapshot: DataSnapshot,
-                previousChildName: String?
-            ) {
-                val activeChallengeIds = snapshot.getValue<String>()
                 if(activeChallengeIds != null) trySend(FirebaseAction.Added(activeChallengeIds))
             }
 
@@ -95,12 +57,12 @@ class ActiveChallengeDataSource @Inject constructor(
                 snapshot: DataSnapshot,
                 previousChildName: String?
             ) {
-                val activeChallengeIds = snapshot.getValue<String>()
+                val activeChallengeIds = snapshot.getValue<FirebaseActiveChallenge>()
                 if(activeChallengeIds != null) trySend(FirebaseAction.Modified(activeChallengeIds))
             }
 
             override fun onChildRemoved(snapshot: DataSnapshot) {
-                val activeChallengeIds = snapshot.getValue<String>()
+                val activeChallengeIds = snapshot.getValue<FirebaseActiveChallenge>()
                 if(activeChallengeIds != null) trySend(FirebaseAction.Removed(activeChallengeIds))
             }
 
@@ -113,9 +75,32 @@ class ActiveChallengeDataSource @Inject constructor(
 
         }
 
-        val ref = firebaseDatabase.child(usersChild).child(userId).child("activeChallenges")
+        firebaseDatabase.child(activeChallengeChild).child(activeChallengeId).addChildEventListener(listener)
 
-        ref.addChildEventListener(listener)
+        awaitClose {
+            firebaseDatabase.removeEventListener(listener)
+        }
+    }
+
+    fun getUserActiveChallenges(userId: String) = callbackFlow {
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val activeChallengeIds = mutableListOf<String>()
+                for (childSnapshot in snapshot.children) {
+                    val activeChallengeId = childSnapshot.getValue<String>()
+                    if (activeChallengeId != null) {
+                        activeChallengeIds.add(activeChallengeId)
+                    }
+                }
+                trySend(activeChallengeIds)
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        }
+
+        val ref = firebaseDatabase.child(usersChild).child(userId).child("activeChallenges")
+        ref.addValueEventListener(listener)
+
         awaitClose {
             ref.removeEventListener(listener)
         }
