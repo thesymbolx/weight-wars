@@ -1,15 +1,20 @@
 package uk.co.weightwars.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import uk.co.weightwars.data.models.ActiveChallenge
 import uk.co.weightwars.data.models.toActiveChallenge
 import uk.co.weightwars.database.dao.ActiveChallengeDao
+import uk.co.weightwars.database.dao.UserDao
 import uk.co.weightwars.database.entities.ActiveChallengeEntity
 import uk.co.weightwars.network.datasource.ActiveChallengeDataSource
+import uk.co.weightwars.network.model.FirebaseAction
 import javax.inject.Inject
 
 class ActiveChallengeRepo @Inject constructor(
+    private val userDao: UserDao,
     private val activeChallengeDao: ActiveChallengeDao,
     private val activeChallengeDataSource: ActiveChallengeDataSource
 ) {
@@ -20,11 +25,14 @@ class ActiveChallengeRepo @Inject constructor(
             }
     }
 
+    suspend fun getActiveChallenges() : Flow<String> {
+       val currentUserId = userDao.getCurrentUser()?.profile?.profileId ?: return flow { emit("null") }
 
-    suspend fun getActiveChallenges() {
-       val activeChallenges = activeChallengeDao.getAll()
+        //This flow returns activeChallengeIDs in a flow
+        activeChallengeDataSource.getUserActiveChallenges("$currentUserId")
 
-
+        //use the above ids here
+        activeChallengeDataSource.getActiveChallenges(/*id here*/)
     }
 
     suspend fun deleteActiveChallenge(challenge: ActiveChallengeEntity) =

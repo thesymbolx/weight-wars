@@ -8,7 +8,7 @@ import com.google.firebase.database.getValue
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import uk.co.weightwars.network.model.NetworkActiveChallenge
+import uk.co.weightwars.network.model.FirebaseActiveChallenge
 import uk.co.weightwars.network.model.User
 import javax.inject.Inject
 
@@ -19,8 +19,8 @@ class UserRemoteDataSource @Inject constructor(
         firebaseDatabase.child("users").child("${user.id}").setValue(user)
     }
 
-    fun setActiveChallenge(networkActiveChallenge: NetworkActiveChallenge) {
-        firebaseDatabase.child("activeChallenges").setValue(networkActiveChallenge)
+    fun setActiveChallenge(firebaseActiveChallenge: FirebaseActiveChallenge) {
+        firebaseDatabase.child("activeChallenges").setValue(firebaseActiveChallenge)
     }
 
     fun getAllUsers(): Flow<User> = callbackFlow {

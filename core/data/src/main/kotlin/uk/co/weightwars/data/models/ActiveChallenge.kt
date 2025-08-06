@@ -1,12 +1,11 @@
 package uk.co.weightwars.data.models
 
-import androidx.room.Entity
 import uk.co.weightwars.database.entities.ActiveChallengeEntity
 import uk.co.weightwars.database.entities.ChallengeInfoEntity
 import uk.co.weightwars.database.entities.ParticipantEntity
 import uk.co.weightwars.database.entities.ScoreEntity
 import uk.co.weightwars.database.entities.SubChallengeEntity
-import uk.co.weightwars.network.model.NetworkActiveChallenge
+import uk.co.weightwars.network.model.FirebaseActiveChallenge
 import java.time.LocalDate
 import kotlin.String
 
@@ -20,7 +19,7 @@ data class ActiveChallenge(
     val subChallenges: List<SubChallenge>
 ) {
     fun toNetworkChallenge() =
-        NetworkActiveChallenge(
+        FirebaseActiveChallenge(
             id = "",
             title = this.title,
             startDate = this.startDate.toString(),

@@ -1,6 +1,6 @@
 package uk.co.weightwars.network.model
 
-data class NetworkActiveChallenge(
+data class FirebaseActiveChallenge(
     val id: String = "",
     val title: String = "",
     val startDate: String = "",

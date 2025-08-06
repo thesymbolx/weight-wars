@@ -7,10 +7,10 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.getValue
 import kotlinx.coroutines.tasks.await
 import jakarta.inject.Inject
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import uk.co.weightwars.network.model.FirebaseAction
-import uk.co.weightwars.network.model.NetworkActiveChallenge
-import uk.co.weightwars.network.model.User
+import uk.co.weightwars.network.model.FirebaseActiveChallenge
 
 class ActiveChallengeDataSource @Inject constructor(
     private val firebaseDatabase: DatabaseReference
@@ -18,17 +18,17 @@ class ActiveChallengeDataSource @Inject constructor(
     val activeChallengeChild = "activeChallenge"
     val usersChild = "users"
 
-    suspend fun createActiveChallenge(networkActiveChallenge: NetworkActiveChallenge) : String {
+    suspend fun createActiveChallenge(firebaseActiveChallenge: FirebaseActiveChallenge) : String {
         val activeChallengeKey = firebaseDatabase.child(activeChallengeChild).push().key ?: throw Exception()
 
-        val challengeWithId = networkActiveChallenge.copy(
+        val challengeWithId = firebaseActiveChallenge.copy(
             id = activeChallengeKey
         )
 
         val childUpdates = hashMapOf<String, Any>(
             "/$activeChallengeChild/$activeChallengeKey" to challengeWithId.toMap(),
         )
-        for (participantId in networkActiveChallenge.participantsIds) {
+        for (participantId in firebaseActiveChallenge.participantsIds) {
             val userActiveChallengePath = "/$usersChild/${participantId}/activeChallenges"
             val existingActiveChallengesSnapshot = firebaseDatabase.child(userActiveChallengePath).get().await()
             val existingActiveChallenges = existingActiveChallengesSnapshot.getValue<List<String>>()?.toMutableList()
@@ -42,13 +42,13 @@ class ActiveChallengeDataSource @Inject constructor(
         return activeChallengeKey
     }
 
-    fun getUserActiveChallenges(userId: String) = callbackFlow {
+    fun getActiveChallenges(activeChallengeId: String) = callbackFlow {
         val listener = object : ChildEventListener {
             override fun onChildAdded(
                 snapshot: DataSnapshot,
                 previousChildName: String?
             ) {
-                val activeChallengeIds = snapshot.getValue<List<String>>()
+                val activeChallengeIds = snapshot.getValue<FirebaseActiveChallenge>()
                 trySend(FirebaseAction.Added(activeChallengeIds))
             }
 
@@ -56,13 +56,52 @@ class ActiveChallengeDataSource @Inject constructor(
                 snapshot: DataSnapshot,
                 previousChildName: String?
             ) {
-                val activeChallengeIds = snapshot.getValue<List<String>>()
+                val activeChallengeIds = snapshot.getValue<FirebaseActiveChallenge>()
                 trySend(FirebaseAction.Modified(activeChallengeIds))
             }
 
             override fun onChildRemoved(snapshot: DataSnapshot) {
-                val activeChallengeIds = snapshot.getValue<List<String>>()
+                val activeChallengeIds = snapshot.getValue<FirebaseActiveChallenge>()
                 trySend(FirebaseAction.Removed(activeChallengeIds))
+            }
+
+            override fun onChildMoved(
+                snapshot: DataSnapshot,
+                previousChildName: String?
+            ) {}
+
+            override fun onCancelled(error: DatabaseError) {}
+
+        }
+
+        firebaseDatabase.child(activeChallengeChild).addChildEventListener(listener)
+
+        awaitClose {
+            firebaseDatabase.removeEventListener(listener)
+        }
+    }
+
+    fun getUserActiveChallenges(userId: String) = callbackFlow {
+        val listener = object : ChildEventListener {
+            override fun onChildAdded(
+                snapshot: DataSnapshot,
+                previousChildName: String?
+            ) {
+                val activeChallengeIds = snapshot.getValue<String>()
+                if(activeChallengeIds != null) trySend(FirebaseAction.Added(activeChallengeIds))
+            }
+
+            override fun onChildChanged(
+                snapshot: DataSnapshot,
+                previousChildName: String?
+            ) {
+                val activeChallengeIds = snapshot.getValue<String>()
+                if(activeChallengeIds != null) trySend(FirebaseAction.Modified(activeChallengeIds))
+            }
+
+            override fun onChildRemoved(snapshot: DataSnapshot) {
+                val activeChallengeIds = snapshot.getValue<String>()
+                if(activeChallengeIds != null) trySend(FirebaseAction.Removed(activeChallengeIds))
             }
 
             override fun onChildMoved(
@@ -77,12 +116,8 @@ class ActiveChallengeDataSource @Inject constructor(
         val ref = firebaseDatabase.child(usersChild).child(userId).child("activeChallenges")
 
         ref.addChildEventListener(listener)
-
+        awaitClose {
+            ref.removeEventListener(listener)
+        }
     }
-
-    fun getActiveChallenges(activeChallengeIds: List<String>) {
-
-    }
-
-
 }
