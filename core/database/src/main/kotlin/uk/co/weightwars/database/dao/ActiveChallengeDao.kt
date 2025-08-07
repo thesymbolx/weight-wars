@@ -23,7 +23,11 @@ interface ActiveChallengeDao {
 
     @Transaction
     @Query("SELECT * FROM ChallengeInfoEntity WHERE challengeInfoId = :challengeInfoId")
-    fun getById(challengeInfoId: Long) : Flow<ActiveChallengeEntity>
+    fun getByIdFlow(challengeInfoId: String) : Flow<ActiveChallengeEntity>
+
+    @Transaction
+    @Query("SELECT * FROM ChallengeInfoEntity WHERE challengeInfoId = :challengeInfoId")
+    fun getById(challengeInfoId: String) : ActiveChallengeEntity?
 
     @Transaction
     @Insert(onConflict = OnConflictStrategy.REPLACE)

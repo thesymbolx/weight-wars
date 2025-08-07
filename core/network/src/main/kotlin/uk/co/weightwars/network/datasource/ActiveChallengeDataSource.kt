@@ -44,11 +44,11 @@ class ActiveChallengeDataSource @Inject constructor(
         return activeChallengeKey
     }
 
-    fun getActiveChallenge(activeChallengeId: String): Flow<FirebaseAction<FirebaseActiveChallenge>> = callbackFlow {
+    fun getActiveChallenge(activeChallengeId: String): Flow<FirebaseActiveChallenge> = callbackFlow {
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val activeChallengeIds = snapshot.getValue<FirebaseActiveChallenge>()
-                if(activeChallengeIds != null) trySend(FirebaseAction.Added(activeChallengeIds))
+                if(activeChallengeIds != null) trySend(activeChallengeIds)
             }
 
             override fun onCancelled(error: DatabaseError) {}

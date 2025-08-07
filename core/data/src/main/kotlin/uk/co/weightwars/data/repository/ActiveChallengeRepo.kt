@@ -1,5 +1,6 @@
 package uk.co.weightwars.data.repository
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emptyFlow
@@ -8,11 +9,11 @@ import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.map
 import uk.co.weightwars.data.models.ActiveChallenge
 import uk.co.weightwars.data.models.toActiveChallenge
+import uk.co.weightwars.data.models.toActiveChallengeEntity
 import uk.co.weightwars.database.dao.ActiveChallengeDao
 import uk.co.weightwars.database.dao.UserDao
 import uk.co.weightwars.database.entities.ActiveChallengeEntity
 import uk.co.weightwars.network.datasource.ActiveChallengeDataSource
-import uk.co.weightwars.network.model.FirebaseAction
 import javax.inject.Inject
 
 class ActiveChallengeRepo @Inject constructor(
@@ -20,14 +21,14 @@ class ActiveChallengeRepo @Inject constructor(
     private val activeChallengeDao: ActiveChallengeDao,
     private val activeChallengeDataSource: ActiveChallengeDataSource
 ) {
-    fun getActiveChallenge(id: Long): Flow<ActiveChallenge> {
-        return activeChallengeDao.getById(id)
+    fun getActiveChallenge(id: String): Flow<ActiveChallenge> {
+        return activeChallengeDao.getByIdFlow(id)
             .map {
                 it.toActiveChallenge()
             }
     }
 
-    suspend fun getActiveChallenges(): Flow<String> {
+    suspend fun getActiveChallenges(): Flow<ActiveChallenge> {
         val currentUserId = userDao.getCurrentUser()?.profile?.profileId ?: return emptyFlow()
 
         return activeChallengeDataSource.getUserActiveChallenges("$currentUserId").flatMapLatest { userActiveChallengeIds ->
@@ -36,11 +37,17 @@ class ActiveChallengeRepo @Inject constructor(
                 } else {
                     userActiveChallengeIds.asFlow().flatMapMerge { userActiveChallengeId ->
                             activeChallengeDataSource.getActiveChallenge(userActiveChallengeId)
-                                .map { firebaseAction ->
-                                    when (firebaseAction) {
-                                        is FirebaseAction.Added -> "added: ${firebaseAction.data}"
-                                        is FirebaseAction.Modified -> "modified: ${firebaseAction.data}"
-                                        is FirebaseAction.Removed -> "removed: (some identifier for removal)"
+                                .map { firebaseActiveChallenge ->
+                                    with(Dispatchers.IO) {
+                                        val cachedActiveChallenge = activeChallengeDao.getById(firebaseActiveChallenge.id)
+
+                                        if(cachedActiveChallenge != null) {
+                                            cachedActiveChallenge.toActiveChallenge()
+                                        } else {
+                                            val activeChallengeEntity = firebaseActiveChallenge.toActiveChallengeEntity()
+                                            activeChallengeDao.insert(activeChallengeEntity)
+                                            activeChallengeEntity.toActiveChallenge()
+                                        }
                                     }
                                 }
                         }

@@ -46,7 +46,7 @@ class ActiveChallengeViewModel @Inject constructor(
 ) : ViewModel() {
     lateinit var activeChallengeEntity: ActiveChallenge
 
-    val id = savedState.get<Long>("activeChallengeId") ?: throw Exception()
+    val id = savedState.get<String>("activeChallengeId") ?: throw Exception()
 
     val uiState = activeChallengeRepo.getActiveChallenge(id).map { activeChallenge ->
         this.activeChallengeEntity = activeChallenge

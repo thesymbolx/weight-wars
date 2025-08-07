@@ -1,5 +1,6 @@
 package uk.co.weightwars.data.models
 
+import androidx.room.PrimaryKey
 import uk.co.weightwars.database.entities.ActiveChallengeEntity
 import uk.co.weightwars.database.entities.ChallengeInfoEntity
 import uk.co.weightwars.database.entities.ParticipantEntity
@@ -118,4 +119,16 @@ fun ActiveChallengeEntity.toActiveChallenge() =
         participants = participants.map { it.participantId }
     )
 
+fun FirebaseActiveChallenge.toActiveChallengeEntity() =
+    ActiveChallengeEntity(
+        challengeInfoEntity = ChallengeInfoEntity(
+            challengeInfoId = id,
+            title = title,
+            startDate = LocalDate.parse(startDate),
+            days = days,
+            isHardcoreMode = false,
+        ),
+        subChallenges = emptyList(),
+        participants = emptyList()
+    )
 

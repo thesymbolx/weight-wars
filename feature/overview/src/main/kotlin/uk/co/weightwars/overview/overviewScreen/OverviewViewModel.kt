@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.map
@@ -21,26 +22,16 @@ data class OverviewUiState(
 class OverviewViewModel @Inject constructor(
     private val activeChallengeRepo: ActiveChallengeRepo
 ) : ViewModel() {
-    val uiState = MutableStateFlow(OverviewUiState())
+    var uiState  = activeChallengeRepo.getActiveChallenges().map { activeChallenge ->
+        OverviewUiState(
+            challenges = activeChallenge
+        )
+    }.stateIn(
+        viewModelScope,
+        started = WhileSubscribed(5_000),
+        initialValue = OverviewUiState()
+    )
 
 
-//    var uiState  = activeChallengeRepo.getActiveChallenges().map { activeChallenge ->
-//        OverviewUiState(
-//            challenges = activeChallenge
-//        )
-//    }.stateIn(
-//        viewModelScope,
-//        started = WhileSubscribed(5_000),
-//        initialValue = OverviewUiState()
-//    )
-
-    init {
-        viewModelScope.launch {
-            activeChallengeRepo.getActiveChallenges().collect {
-                Log.d("booboo", "$it")
-            }
-        }
-
-    }
 
 }
