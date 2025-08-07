@@ -70,14 +70,6 @@ class FriendsViewModel @Inject constructor(
             initialValue = FriendsUiState()
         )
 
-    fun saveCurrentUserName(newName: String) = viewModelScope.launch(Dispatchers.IO) {
-        val currentUser = userRepo.getCurrentUser() ?: userRepo.createCurrentUser(newName)
-        val profile = currentUser.profile
-        val profileWithNewName = profile.copy(name = newName)
-        val userWithNewName = currentUser.copy(profile = profileWithNewName)
-        userRepo.saveCurrentUser(userWithNewName)
-    }
-
     fun toggleFriend(newFriend: UserState) = viewModelScope.launch(Dispatchers.IO) {
         val friendId = newFriend.id
         val currentUser = userRepo.getCurrentUser() ?: return@launch

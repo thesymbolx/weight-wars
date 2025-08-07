@@ -40,43 +40,12 @@ fun FriendsScreen(friendsViewModel: FriendsViewModel = hiltViewModel()) {
     val uiState by friendsViewModel.uiState.collectAsStateWithLifecycle()
 
     Column {
-        CurrentUserName(uiState.name, friendsViewModel::saveCurrentUserName)
-
-        Spacer(modifier = Modifier.height(50.dp))
-
         FriendsList(uiState.users) { friendId ->
             friendsViewModel.toggleFriend(friendId)
         }
     }
 }
 
-@Composable
-private fun CurrentUserName(
-    name: String,
-    onSaveUserName: (String) -> Unit
-) {
-    var userName by remember(name) {
-        mutableStateOf(name)
-    }
-
-    Column {
-        TextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = userName,
-            onValueChange = { userName = it },
-            label = { Text("Enter your name") }
-        )
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
-            enabled = userName.isNotEmpty(),
-            onClick = { onSaveUserName(userName) }
-        ) {
-            Text("Save")
-        }
-    }
-}
 
 @Composable
 private fun FriendsList(

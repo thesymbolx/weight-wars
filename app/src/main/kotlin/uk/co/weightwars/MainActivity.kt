@@ -28,6 +28,7 @@ import com.google.firebase.Firebase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import uk.co.weightwars.data.repository.ChallengeRepo
+import uk.co.weightwars.data.repository.UserRepo
 import uk.co.weightwars.database.dao.ChallengeDao
 import uk.co.weightwars.database.entities.Challenge
 import uk.co.weightwars.database.entities.ChallengeCategory
@@ -42,6 +43,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var activeChallengeDao: ChallengeDao
+
+    @Inject
+    lateinit var userRepo: UserRepo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -16,16 +16,21 @@ class UserRepo @Inject constructor(
 
     fun getCurrentUserAsFlow() = userDao.getCurrentUserAsFlow()
 
-    fun createCurrentUser(name: String): CurrentUser {
+    suspend fun createCurrentUser(currentUser: CurrentUser) {
         val nodeKey = userRemoteDataSource.createUser()
 
-        return CurrentUser(
-            profile = Profile(
-                profileId = nodeKey,
-                name = name
+        val userWithKey = currentUser.copy(
+            profile = currentUser.profile.copy(
+                profileId = nodeKey
             ),
-            friends = emptyList()
+            friends = currentUser.friends.map {
+                it.copy(
+                    profileParentId = nodeKey
+                )
+            }
         )
+
+        userDao.insertCurrentUser(userWithKey)
     }
 
     suspend fun saveCurrentUser(currentUser: CurrentUser) {
