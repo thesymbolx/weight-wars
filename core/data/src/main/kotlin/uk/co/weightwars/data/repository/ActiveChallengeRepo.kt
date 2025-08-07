@@ -32,7 +32,7 @@ class ActiveChallengeRepo @Inject constructor(
     }
 
     fun getActiveChallenges(): Flow<ActiveChallenge> = flow {
-        val currentUserId: Long? = withContext(Dispatchers.IO) {
+        val currentUserId: String? = withContext(Dispatchers.IO) {
             val currentUserId = userDao.getCurrentUser()?.profile?.profileId
             if (currentUserId == null) {
                 emitAll(emptyFlow())
@@ -43,7 +43,7 @@ class ActiveChallengeRepo @Inject constructor(
         if(currentUserId == null) return@flow
 
         emitAll(
-            activeChallengeDataSource.getUserActiveChallenges("$currentUserId").flatMapLatest { userActiveChallengeIds ->
+            activeChallengeDataSource.getUserActiveChallenges(currentUserId).flatMapLatest { userActiveChallengeIds ->
                 if (userActiveChallengeIds.isEmpty()) {
                     emptyFlow()
                 } else {

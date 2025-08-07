@@ -38,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import uk.co.weightwars.challenges.R
 import uk.co.weightwars.designsystem.WeightWarsTheme
-import uk.co.weightwars.network.model.User
 import uk.co.weightwars.ui.parallaxLayoutModifier
 
 

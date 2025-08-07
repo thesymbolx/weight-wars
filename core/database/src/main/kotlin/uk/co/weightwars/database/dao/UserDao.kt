@@ -18,7 +18,7 @@ interface UserDao {
         val userId = insertProfile(currentUser.profile)
 
         val newFriends = currentUser.friends.map {
-            it.copy(profileParentId = userId)
+            it.copy(profileParentId = currentUser.profile.profileId)
         }
 
         val existingFriends = getFriendsByProfileParentId(userId)

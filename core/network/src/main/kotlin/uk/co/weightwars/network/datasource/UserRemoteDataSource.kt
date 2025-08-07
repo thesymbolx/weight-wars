@@ -9,27 +9,37 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import uk.co.weightwars.network.model.FirebaseActiveChallenge
-import uk.co.weightwars.network.model.User
+import uk.co.weightwars.network.model.FirebaseUser
 import javax.inject.Inject
 
 class UserRemoteDataSource @Inject constructor(
     private val firebaseDatabase: DatabaseReference
 ) {
-    fun setUser(user: User) {
-        firebaseDatabase.child("users").child("${user.id}").setValue(user)
+    val usersNode = "users"
+
+    fun createUser() : String {
+        val ref = firebaseDatabase.child(usersNode)
+        return ref.push().key ?: throw Exception()
+    }
+
+    fun setUser(firebaseUser: FirebaseUser) {
+        firebaseDatabase
+            .child(usersNode)
+            .child("${firebaseUser.id}")
+            .setValue(firebaseUser)
     }
 
     fun setActiveChallenge(firebaseActiveChallenge: FirebaseActiveChallenge) {
         firebaseDatabase.child("activeChallenges").setValue(firebaseActiveChallenge)
     }
 
-    fun getAllUsers(): Flow<User> = callbackFlow {
+    fun getAllUsers(): Flow<FirebaseUser> = callbackFlow {
         val listener = object : ChildEventListener {
             override fun onChildAdded(
                 snapshot: DataSnapshot,
                 previousChildName: String?
             ) {
-                val friend = snapshot.getValue<User>()
+                val friend = snapshot.getValue<FirebaseUser>()
                 if(friend != null) trySend(friend)
             }
 
@@ -37,7 +47,7 @@ class UserRemoteDataSource @Inject constructor(
                 snapshot: DataSnapshot,
                 previousChildName: String?
             ) {
-                val friend = snapshot.getValue<User>()
+                val friend = snapshot.getValue<FirebaseUser>()
                 if(friend != null) trySend(friend)
             }
 

@@ -28,7 +28,7 @@ data class FriendsUiState(
 )
 
 data class UserState(
-    val id: Long,
+    val id: String,
     val name: String,
     val isSelected: Boolean
 )
@@ -71,8 +71,7 @@ class FriendsViewModel @Inject constructor(
         )
 
     fun saveCurrentUserName(newName: String) = viewModelScope.launch(Dispatchers.IO) {
-        val currentUser =
-            userRepo.getCurrentUser() ?: CurrentUser(Profile(name = newName), emptyList())
+        val currentUser = userRepo.getCurrentUser() ?: userRepo.createCurrentUser(newName)
         val profile = currentUser.profile
         val profileWithNewName = profile.copy(name = newName)
         val userWithNewName = currentUser.copy(profile = profileWithNewName)
@@ -92,7 +91,8 @@ class FriendsViewModel @Inject constructor(
             friends.add(
                 Friend(
                     friendId = newFriend.id,
-                    name = newFriend.name
+                    name = newFriend.name,
+                    profileParentId = currentUser.profile.profileId
                 )
             )
         }

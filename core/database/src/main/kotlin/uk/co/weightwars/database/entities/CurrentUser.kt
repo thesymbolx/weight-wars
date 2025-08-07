@@ -13,13 +13,13 @@ data class CurrentUser(
 
 @Entity
 data class Profile(
-    @PrimaryKey val profileId: Long = 0,
+    @PrimaryKey val profileId: String,
     val name: String,
 )
 
 @Entity
 data class Friend(
-    @PrimaryKey val friendId: Long = 0,
+    @PrimaryKey val friendId: String,
     val name: String,
-    val profileParentId: Long = -1
+    val profileParentId: String
 )
