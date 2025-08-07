@@ -45,38 +45,17 @@ class ActiveChallengeDataSource @Inject constructor(
     }
 
     fun getActiveChallenge(activeChallengeId: String): Flow<FirebaseAction<FirebaseActiveChallenge>> = callbackFlow {
-        val listener = object : ChildEventListener {
-            override fun onChildAdded(
-                snapshot: DataSnapshot,
-                previousChildName: String?
-            ) {
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
                 val activeChallengeIds = snapshot.getValue<FirebaseActiveChallenge>()
                 if(activeChallengeIds != null) trySend(FirebaseAction.Added(activeChallengeIds))
             }
-
-            override fun onChildChanged(
-                snapshot: DataSnapshot,
-                previousChildName: String?
-            ) {
-                val activeChallengeIds = snapshot.getValue<FirebaseActiveChallenge>()
-                if(activeChallengeIds != null) trySend(FirebaseAction.Modified(activeChallengeIds))
-            }
-
-            override fun onChildRemoved(snapshot: DataSnapshot) {
-                val activeChallengeIds = snapshot.getValue<FirebaseActiveChallenge>()
-                if(activeChallengeIds != null) trySend(FirebaseAction.Removed(activeChallengeIds))
-            }
-
-            override fun onChildMoved(
-                snapshot: DataSnapshot,
-                previousChildName: String?
-            ) {}
 
             override fun onCancelled(error: DatabaseError) {}
 
         }
 
-        firebaseDatabase.child(activeChallengeChild).child(activeChallengeId).addChildEventListener(listener)
+        firebaseDatabase.child(activeChallengeChild).child(activeChallengeId).addValueEventListener(listener)
 
         awaitClose {
             firebaseDatabase.removeEventListener(listener)
