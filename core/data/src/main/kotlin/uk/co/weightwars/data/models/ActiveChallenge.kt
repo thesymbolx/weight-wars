@@ -16,7 +16,7 @@ data class ActiveChallenge(
     val startDate: LocalDate,
     val days: Int,
     val isHardcoreMode: Boolean,
-    val participants: List<Long>,
+    val participants: List<String>,
     val subChallenges: List<SubChallenge>
 ) {
     fun toNetworkChallenge() =
@@ -53,7 +53,10 @@ data class ActiveChallenge(
                 )
             },
             participants = participants.map {
-                ParticipantEntity(it)
+                ParticipantEntity(
+                    participantId = it,
+                    challengeInfoParentId = challengeId
+                )
             }
         )
 }
@@ -129,6 +132,11 @@ fun FirebaseActiveChallenge.toActiveChallengeEntity() =
             isHardcoreMode = false,
         ),
         subChallenges = emptyList(),
-        participants = emptyList()
+        participants = participantsIds.map { participantId ->
+            ParticipantEntity(
+                participantId = participantId,
+                challengeInfoParentId = id
+            )
+        }
     )
 

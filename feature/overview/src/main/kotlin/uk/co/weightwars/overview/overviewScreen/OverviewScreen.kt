@@ -63,11 +63,11 @@ private fun OverviewScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .clickable { onChallengeClick(it.challengeInfoEntity.challengeInfoId) }
+                    .clickable { onChallengeClick(it.challengeInfoId) }
             ) {
                 Text(
                     modifier = Modifier.padding(16.dp),
-                    text = it.challengeInfoEntity.title,
+                    text = it.title,
                     style = MaterialTheme.typography.headlineMedium
                 )
             }

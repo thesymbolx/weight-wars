@@ -17,8 +17,8 @@ data class ActiveChallengeEntity(
 
 @Entity
 data class ParticipantEntity(
-    @PrimaryKey(autoGenerate = true) val participantId: Long = 0,
-    val challengeInfoParentId: Long = 0
+    @PrimaryKey val participantId: String,
+    val challengeInfoParentId: String
 )
 
 @Entity

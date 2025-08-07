@@ -3,10 +3,13 @@ package uk.co.weightwars.data.repository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import uk.co.weightwars.data.models.ActiveChallenge
 import uk.co.weightwars.data.models.toActiveChallenge
 import uk.co.weightwars.data.models.toActiveChallengeEntity
@@ -28,31 +31,41 @@ class ActiveChallengeRepo @Inject constructor(
             }
     }
 
-    suspend fun getActiveChallenges(): Flow<ActiveChallenge> {
-        val currentUserId = userDao.getCurrentUser()?.profile?.profileId ?: return emptyFlow()
+    fun getActiveChallenges(): Flow<ActiveChallenge> = flow {
+        val currentUserId: Long? = withContext(Dispatchers.IO) {
+            val currentUserId = userDao.getCurrentUser()?.profile?.profileId
+            if (currentUserId == null) {
+                emitAll(emptyFlow())
+            }
+            currentUserId
+        }
 
-        return activeChallengeDataSource.getUserActiveChallenges("$currentUserId").flatMapLatest { userActiveChallengeIds ->
+        if(currentUserId == null) return@flow
+
+        emitAll(
+            activeChallengeDataSource.getUserActiveChallenges("$currentUserId").flatMapLatest { userActiveChallengeIds ->
                 if (userActiveChallengeIds.isEmpty()) {
                     emptyFlow()
                 } else {
                     userActiveChallengeIds.asFlow().flatMapMerge { userActiveChallengeId ->
-                            activeChallengeDataSource.getActiveChallenge(userActiveChallengeId)
-                                .map { firebaseActiveChallenge ->
-                                    with(Dispatchers.IO) {
-                                        val cachedActiveChallenge = activeChallengeDao.getById(firebaseActiveChallenge.id)
+                        activeChallengeDataSource.getActiveChallenge(userActiveChallengeId)
+                            .map { firebaseActiveChallenge ->
+                                withContext(Dispatchers.IO) {
+                                    val cachedActiveChallenge = activeChallengeDao.getById(firebaseActiveChallenge.id)
 
-                                        if(cachedActiveChallenge != null) {
-                                            cachedActiveChallenge.toActiveChallenge()
-                                        } else {
-                                            val activeChallengeEntity = firebaseActiveChallenge.toActiveChallengeEntity()
-                                            activeChallengeDao.insert(activeChallengeEntity)
-                                            activeChallengeEntity.toActiveChallenge()
-                                        }
+                                    if(cachedActiveChallenge != null) {
+                                        cachedActiveChallenge.toActiveChallenge()
+                                    } else {
+                                        val activeChallengeEntity = firebaseActiveChallenge.toActiveChallengeEntity()
+                                        activeChallengeDao.insert(activeChallengeEntity)
+                                        activeChallengeEntity.toActiveChallenge()
                                     }
                                 }
-                        }
+                            }
+                    }
                 }
             }
+        )
     }
 
     suspend fun deleteActiveChallenge(challenge: ActiveChallengeEntity) =

@@ -32,7 +32,7 @@ data class SelectedChallengeState(
 )
 
 data class FriendState(
-    val id: Long,
+    val id: String,
     val name: String,
     val isSelected: Boolean
 )

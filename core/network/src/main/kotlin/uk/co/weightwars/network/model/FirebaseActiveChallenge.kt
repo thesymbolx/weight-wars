@@ -6,7 +6,7 @@ data class FirebaseActiveChallenge(
     val startDate: String = "",
     val days: Int = 0,
     val isHardcoreMode: Boolean = false,
-    val participantsIds: List<Long> = listOf(),
+    val participantsIds: List<String> = listOf(),
     val subChallengeIds: List<Long> = listOf()
 ) {
     fun toMap(): Map<String, Any?> {
