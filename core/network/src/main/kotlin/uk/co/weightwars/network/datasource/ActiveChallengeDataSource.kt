@@ -9,6 +9,7 @@ import com.google.firebase.database.getValue
 import kotlinx.coroutines.tasks.await
 import jakarta.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import uk.co.weightwars.network.model.FirebaseAction
 import uk.co.weightwars.network.model.FirebaseActiveChallenge
@@ -43,7 +44,7 @@ class ActiveChallengeDataSource @Inject constructor(
         return activeChallengeKey
     }
 
-    fun getActiveChallenges(activeChallengeId: String) = callbackFlow {
+    fun getActiveChallenge(activeChallengeId: String): Flow<FirebaseAction<FirebaseActiveChallenge>> = callbackFlow {
         val listener = object : ChildEventListener {
             override fun onChildAdded(
                 snapshot: DataSnapshot,

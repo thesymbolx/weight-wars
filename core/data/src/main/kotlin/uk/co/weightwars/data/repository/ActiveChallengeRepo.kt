@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import uk.co.weightwars.data.models.ActiveChallenge
 import uk.co.weightwars.data.models.toActiveChallenge
 import uk.co.weightwars.database.dao.ActiveChallengeDao
@@ -12,7 +13,6 @@ import uk.co.weightwars.database.entities.ActiveChallengeEntity
 import uk.co.weightwars.network.datasource.ActiveChallengeDataSource
 import uk.co.weightwars.network.model.FirebaseAction
 import uk.co.weightwars.network.model.FirebaseActiveChallenge
-import java.lang.Exception
 import javax.inject.Inject
 
 class ActiveChallengeRepo @Inject constructor(
@@ -28,20 +28,21 @@ class ActiveChallengeRepo @Inject constructor(
     }
 
     suspend fun getActiveChallenges() : Flow<String> {
-       val currentUserId = userDao.getCurrentUser()?.profile?.profileId ?: throw Exception("make work offline only")
+       val currentUserId = userDao.getCurrentUser()?.profile?.profileId ?: return flow { emit("this is am empty flow") }
 
         return activeChallengeDataSource.getUserActiveChallenges("$currentUserId").flatMapLatest { userActiveChallengeIds ->
-            flow {
-                userActiveChallengeIds.forEach { userActiveChallengeId ->
-                    activeChallengeDataSource.getActiveChallenges(userActiveChallengeId).map { activeChallenge ->
-                        when(activeChallenge) {
-                            is FirebaseAction.Added -> emit(activeChallenge.data.toString())
-                            is FirebaseAction.Modified -> emit(activeChallenge.data.toString())
-                            is FirebaseAction.Removed<*> -> throw Exception()
-                        }
+
+            val flows: List<Flow<String>>  = userActiveChallengeIds.map { userActiveChallengeId ->
+                activeChallengeDataSource.getActiveChallenge(userActiveChallengeId).map { firebaseAction ->
+                    when(firebaseAction) {
+                        is FirebaseAction.Added -> "added: ${firebaseAction.data}"
+                        is FirebaseAction.Modified -> "added: ${firebaseAction.data}"
+                        is FirebaseAction.Removed -> TODO()
                     }
                 }
             }
+
+            merge(*flows.toTypedArray())
         }
     }
 
