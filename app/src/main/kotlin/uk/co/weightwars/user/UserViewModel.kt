@@ -30,6 +30,8 @@ class UserViewModel @Inject constructor(
         )
 
         userRepo.createCurrentUser(newUser)
+
+        userCreated = true
     }
 
     fun userCreated() {

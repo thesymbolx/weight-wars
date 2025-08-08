@@ -17,6 +17,10 @@ import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -34,6 +38,7 @@ import uk.co.weightwars.database.entities.Challenge
 import uk.co.weightwars.database.entities.ChallengeCategory
 import uk.co.weightwars.database.entities.ChallengeWithCategory
 import uk.co.weightwars.designsystem.WeightWarsTheme
+import uk.co.weightwars.user.UserScreen
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -49,9 +54,14 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            App()
+
+        lifecycleScope.launch {
+            val hasCurrentUser = userRepo.getCurrentUser()
+
+            enableEdgeToEdge()
+            setContent {
+                App(hasCurrentUser != null)
+            }
         }
 
         populateCatDatabase()
@@ -156,9 +166,12 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun App() {
+fun App(currentUserSet: Boolean) {
     val navController = rememberNavController()
     val appState = rememberAppState(navController)
+    var currentUserSet by remember {
+        mutableStateOf(currentUserSet)
+    }
 
     WeightWarsTheme {
         AppBackground(modifier = Modifier) {
@@ -169,8 +182,15 @@ fun App() {
                 },
             ) { innerPadding ->
                 Box(modifier = Modifier.padding(innerPadding)) {
-                    AppNavHost(navController, appState)
+                    if(currentUserSet) {
+                        AppNavHost(navController, appState)
+                    } else {
+                        UserScreen {
+                            currentUserSet = true
+                        }
+                    }
                 }
+
             }
         }
     }

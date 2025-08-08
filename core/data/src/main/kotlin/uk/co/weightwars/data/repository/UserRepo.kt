@@ -2,11 +2,9 @@ package uk.co.weightwars.data.repository
 
 import uk.co.weightwars.database.dao.UserDao
 import uk.co.weightwars.database.entities.CurrentUser
-import uk.co.weightwars.database.entities.Profile
 import uk.co.weightwars.network.datasource.UserRemoteDataSource
 import javax.inject.Inject
 import uk.co.weightwars.network.model.FirebaseUser
-import kotlin.random.Random
 
 class UserRepo @Inject constructor(
     private val userDao: UserDao,
@@ -17,7 +15,7 @@ class UserRepo @Inject constructor(
     fun getCurrentUserAsFlow() = userDao.getCurrentUserAsFlow()
 
     suspend fun createCurrentUser(currentUser: CurrentUser) {
-        val nodeKey = userRemoteDataSource.createUser()
+        val nodeKey = userRemoteDataSource.createUserKey()
 
         val userWithKey = currentUser.copy(
             profile = currentUser.profile.copy(
@@ -30,13 +28,21 @@ class UserRepo @Inject constructor(
             }
         )
 
+        userRemoteDataSource.setUser(
+            FirebaseUser(
+                id = nodeKey,
+                name = userWithKey.profile.name,
+                friends = currentUser.friends.map { it.friendId }
+            )
+        )
+
         userDao.insertCurrentUser(userWithKey)
     }
 
     suspend fun saveCurrentUser(currentUser: CurrentUser) {
         val dbUser = userDao.getCurrentUser()
         val user = if(dbUser == null) {
-            val firebaseNodeId = userRemoteDataSource.createUser()
+            val firebaseNodeId = userRemoteDataSource.createUserKey()
             currentUser.copy(profile = currentUser.profile.copy(profileId = firebaseNodeId))
         } else currentUser
 

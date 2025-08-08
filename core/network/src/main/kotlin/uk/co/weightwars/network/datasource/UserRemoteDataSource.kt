@@ -17,7 +17,7 @@ class UserRemoteDataSource @Inject constructor(
 ) {
     val usersNode = "users"
 
-    fun createUser() : String {
+    fun createUserKey() : String {
         val ref = firebaseDatabase.child(usersNode)
         return ref.push().key ?: throw Exception()
     }
