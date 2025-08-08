@@ -1,6 +1,8 @@
 package uk.co.weightwars.friends
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,11 +12,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -32,17 +38,42 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import uk.co.weightwars.ui.parallaxLayoutModifier
 import kotlin.collections.forEach
 
 
 @Composable
-fun FriendsScreen(friendsViewModel: FriendsViewModel = hiltViewModel()) {
+fun FriendsScreen(
+    friendsViewModel: FriendsViewModel = hiltViewModel(),
+    onBack: () -> Unit
+) {
     val uiState by friendsViewModel.uiState.collectAsStateWithLifecycle()
+    val scrollState = rememberScrollState()
 
-    Column {
+    Column(modifier = Modifier.verticalScroll(scrollState)) {
+        Header(scrollState = scrollState, onBack = onBack)
+
         FriendsList(uiState.users) { friendId ->
             friendsViewModel.toggleFriend(friendId)
         }
+    }
+}
+
+@Composable
+private fun Header(
+    scrollState: ScrollState,
+    onBack: () -> Unit
+) {
+    Column(modifier = Modifier.parallaxLayoutModifier(scrollState, 2)) {
+        IconButton(onClick = onBack) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
+        }
+
+        Text(
+            modifier = Modifier.padding(16.dp),
+            text = stringResource(R.string.friends),
+            style = MaterialTheme.typography.displaySmall
+        )
     }
 }
 
@@ -52,28 +83,18 @@ private fun FriendsList(
     friends: Set<UserState>,
     onFriendToggle: (UserState) -> Unit
 ) {
-    LazyColumn(
+    Column(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
-        item {
+        if (friends.isEmpty()) {
             Text(
-                text = stringResource(R.string.add_friends),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 16.dp)
+                text = stringResource(R.string.no_friends_available),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
-        item {
-            if (friends.isEmpty()) {
-                Text(
-                    text = stringResource(R.string.no_friends_available),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-
-        items(items = friends.toList(), key = { it.id }) { friend ->
+        friends.toList().forEach { friend ->
             FriendCard(
                 friend = friend,
                 isSelected = friend.isSelected,

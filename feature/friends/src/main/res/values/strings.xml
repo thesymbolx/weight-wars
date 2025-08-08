@@ -3,4 +3,6 @@
     <string name="invite_friends">Invite Friends</string>
     <string name="add_friends">Add Friends</string>
     <string name="no_friends_available">No Friends Available</string>
+
+    <string name="friends">Add Friends</string>
 </resources>

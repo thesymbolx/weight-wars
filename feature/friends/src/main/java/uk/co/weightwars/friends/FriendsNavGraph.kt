@@ -16,6 +16,8 @@ fun NavGraphBuilder.friendsNavGraph(
     navController: NavHostController
 ) = navigation<FriendsNavGraphRoute>(startDestination = FriendsRoute) {
     composable<FriendsRoute> {
-        FriendsScreen()
+        FriendsScreen{
+            navController.popBackStack()
+        }
     }
 }
