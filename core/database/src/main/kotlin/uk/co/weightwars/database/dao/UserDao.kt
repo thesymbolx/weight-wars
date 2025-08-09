@@ -15,13 +15,13 @@ interface UserDao {
     @Transaction
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCurrentUser(currentUser: CurrentUser) {
-        val userId = insertProfile(currentUser.profile)
+        insertProfile(currentUser.profile)
 
         val newFriends = currentUser.friends.map {
             it.copy(profileParentId = currentUser.profile.profileId)
         }
 
-        val existingFriends = getFriendsByProfileParentId(userId)
+        val existingFriends = getFriendsByProfileParentId(currentUser.profile.profileId)
         val friendsToRemove = existingFriends.filterNot { existingFriend -> newFriends.any { it.friendId == existingFriend.friendId } }
         deleteFriends(friendsToRemove)
 
@@ -41,7 +41,7 @@ interface UserDao {
     suspend fun insertProfile(profile: Profile): Long
 
     @Query("SELECT * FROM friend WHERE profileParentId = :profileParentId")
-    suspend fun getFriendsByProfileParentId(profileParentId: Long): List<Friend>
+    suspend fun getFriendsByProfileParentId(profileParentId: String): List<Friend>
 
     @androidx.room.Delete
     suspend fun deleteFriends(friends: List<Friend>)

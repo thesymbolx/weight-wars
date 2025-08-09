@@ -53,8 +53,8 @@ fun FriendsScreen(
     Column(modifier = Modifier.verticalScroll(scrollState)) {
         Header(scrollState = scrollState, onBack = onBack)
 
-        FriendsList(uiState.users) { friendId ->
-            friendsViewModel.toggleFriend(friendId)
+        FriendsList(uiState.users) { userState ->
+            friendsViewModel.toggleFriend(userState)
         }
     }
 }
