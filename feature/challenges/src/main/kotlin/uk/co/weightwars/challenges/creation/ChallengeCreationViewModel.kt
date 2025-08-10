@@ -5,15 +5,18 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.co.weightwars.data.models.ActiveChallenge
+import uk.co.weightwars.data.models.Challenge
 import uk.co.weightwars.data.models.SubChallenge
 import uk.co.weightwars.data.repository.ActiveChallengeRepo
 import uk.co.weightwars.data.repository.ChallengeRepo
 import uk.co.weightwars.data.repository.UserRepo
-import uk.co.weightwars.database.entities.Challenge
 import uk.co.weightwars.database.entities.CurrentUser
 import java.time.LocalDate
 import javax.inject.Inject
@@ -71,23 +74,28 @@ class ChallengeCreationViewModel @Inject constructor(
         }
     }
 
-    fun addChallenge(challengeId: Long) = viewModelScope.launch {
-        val challenge: Challenge = with(Dispatchers.IO) {
-            challengeRepo.getChallenge(challengeId)
+    fun addChallenge(challengeId: Int) = viewModelScope.launch {
+        val challenge = with(Dispatchers.IO) {
+            // Get all categories and find the specific challenge by ID
+            val categories = challengeRepo.getAllCategories().first()
+            categories.flatMap { it.challenges }.find { it.challengeId == challengeId }
         }
 
-        challenges.add(challenge)
+        // Only add the challenge if it was found
+        challenge?.let { foundChallenge ->
+            challenges.add(foundChallenge)
 
-        _uiState.update {
-            it.copy(
-                saveEnabled = currentUser != null,
-                selectedChallengeState = challenges.map {
-                    SelectedChallengeState(
-                        id = it.challengeId,
-                        title = it.title
-                    )
-                }
-            )
+            _uiState.update {
+                it.copy(
+                    saveEnabled = currentUser != null,
+                    selectedChallengeState = challenges.map {
+                        SelectedChallengeState(
+                            id = it.challengeId.toLong(),
+                            title = it.title
+                        )
+                    }
+                )
+            }
         }
     }
 

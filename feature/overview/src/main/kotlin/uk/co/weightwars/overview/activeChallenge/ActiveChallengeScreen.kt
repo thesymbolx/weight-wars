@@ -56,7 +56,7 @@ fun ActiveChallengeScreen(
 @Composable
 fun ActiveChallengeScreen(
     activeChallengeState: ActiveChallengeState,
-    onDayClick: (Long, LocalDate) -> Unit,
+    onDayClick: (Int, LocalDate) -> Unit,
     onBack: () -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -120,7 +120,7 @@ private fun Header(
 @Composable
 private fun ChallengeCard(
     challenge: ChallengeState,
-    onScoreClick: (Long, LocalDate) -> Unit
+    onScoreClick: (Int, LocalDate) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 

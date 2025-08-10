@@ -16,13 +16,13 @@ import uk.co.weightwars.data.models.toActiveChallengeEntity
 import uk.co.weightwars.database.dao.ActiveChallengeDao
 import uk.co.weightwars.database.dao.UserDao
 import uk.co.weightwars.database.entities.ActiveChallengeEntity
-import uk.co.weightwars.network.datasource.ActiveChallengeDataSource
+import uk.co.weightwars.network.datasource.ActiveChallengeRemoteDataSource
 import javax.inject.Inject
 
 class ActiveChallengeRepo @Inject constructor(
     private val userDao: UserDao,
     private val activeChallengeDao: ActiveChallengeDao,
-    private val activeChallengeDataSource: ActiveChallengeDataSource
+    private val activeChallengeRemoteDataSource: ActiveChallengeRemoteDataSource
 ) {
     fun getActiveChallenge(id: String): Flow<ActiveChallenge> {
         return activeChallengeDao.getByIdFlow(id)
@@ -30,6 +30,7 @@ class ActiveChallengeRepo @Inject constructor(
                 it.toActiveChallenge()
             }
     }
+    
 
     fun getActiveChallenges(): Flow<ActiveChallenge> = flow {
         val currentUserId: String? = withContext(Dispatchers.IO) {
@@ -43,12 +44,12 @@ class ActiveChallengeRepo @Inject constructor(
         if(currentUserId == null) return@flow
 
         emitAll(
-            activeChallengeDataSource.getUserActiveChallenges(currentUserId).flatMapLatest { userActiveChallengeIds ->
+            activeChallengeRemoteDataSource.getUserActiveChallenges(currentUserId).flatMapLatest { userActiveChallengeIds ->
                 if (userActiveChallengeIds.isEmpty()) {
                     emptyFlow()
                 } else {
                     userActiveChallengeIds.asFlow().flatMapMerge { userActiveChallengeId ->
-                        activeChallengeDataSource.getActiveChallenge(userActiveChallengeId)
+                        activeChallengeRemoteDataSource.getActiveChallenge(userActiveChallengeId)
                             .map { firebaseActiveChallenge ->
                                 withContext(Dispatchers.IO) {
                                     val cachedActiveChallenge = activeChallengeDao.getById(firebaseActiveChallenge.id)
@@ -72,7 +73,7 @@ class ActiveChallengeRepo @Inject constructor(
         activeChallengeDao.delete(challenge)
 
     suspend fun createActiveChallenge(activeChallenge: ActiveChallenge) {
-        val firebaseNodeKey = activeChallengeDataSource.createActiveChallenge(activeChallenge.toNetworkChallenge())
+        val firebaseNodeKey = activeChallengeRemoteDataSource.createActiveChallenge(activeChallenge.toNetworkChallenge())
         activeChallengeDao.insert(activeChallenge.toActiveChallengeEntity(firebaseNodeKey))
     }
 

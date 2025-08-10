@@ -8,7 +8,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import uk.co.weightwars.database.RoomDatabase
-import uk.co.weightwars.database.dao.ChallengeDao
 import javax.inject.Singleton
 
 @Module
@@ -24,10 +23,6 @@ DatabaseModule {
             klass = RoomDatabase::class.java,
             name = "database-weight-wars"
         ).build()
-
-    @Provides
-    fun challengeDaoBinding(roomDatabase: RoomDatabase): ChallengeDao =
-        roomDatabase.challengeDao()
 
     @Provides
     fun activeChallengeBinding(roomDatabase: RoomDatabase) =

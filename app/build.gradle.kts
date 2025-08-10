@@ -52,6 +52,8 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:designsystem"))
     implementation(project(":feature:friends"))
+    implementation(project(":core:network"))
+
 
 
     implementation(platform(libs.androidx.compose.bom))

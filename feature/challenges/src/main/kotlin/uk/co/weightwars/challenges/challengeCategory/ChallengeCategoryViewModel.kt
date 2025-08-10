@@ -1,14 +1,13 @@
 package uk.co.weightwars.challenges.challengeCategory
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import uk.co.weightwars.data.models.ChallengeCategory
 import uk.co.weightwars.data.repository.ChallengeRepo
-import uk.co.weightwars.database.entities.ChallengeCategory
 import javax.inject.Inject
 
 data class ChallengeCategoryUiState(
@@ -17,15 +16,15 @@ data class ChallengeCategoryUiState(
 
 @HiltViewModel
 class ChallengeCategoryViewModel @Inject constructor(
-    private val challengeCategoryDao: ChallengeRepo,
+    private val challengeRepo: ChallengeRepo
 ) : ViewModel() {
-    var uiState by mutableStateOf(ChallengeCategoryUiState())
-
-    fun getChallengeCategories() = viewModelScope.launch {
-        val categories = challengeCategoryDao.getAllCategories()
-
-        uiState = uiState.copy(
-            categories = categories.map { it.challengeCategory }
+    var uiState  = challengeRepo.getAllCategories().map { challenges ->
+        ChallengeCategoryUiState(
+            categories = challenges
         )
-    }
+    }.stateIn(
+        viewModelScope,
+        started = WhileSubscribed(5_000),
+        initialValue = ChallengeCategoryUiState()
+    )
 }

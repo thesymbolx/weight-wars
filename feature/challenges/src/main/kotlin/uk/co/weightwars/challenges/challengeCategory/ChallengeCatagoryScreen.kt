@@ -18,29 +18,23 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import uk.co.weightwars.challenges.R
 
 @Composable
 fun ChallengeCategoryScreen(
     viewModel: ChallengeCategoryViewModel = hiltViewModel(),
-    onCategoryClick: (Long) -> Unit,
+    onCategoryClick: (Int) -> Unit,
     onBack: () -> Unit
 ) {
-    val state = viewModel.uiState
-
-    LifecycleResumeEffect(Unit) {
-        viewModel.getChallengeCategories()
-
-        onPauseOrDispose {
-            // do any needed clean up here
-        }
-    }
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     ChallengeCategoryScreen(
         challengeUiState = state,
@@ -52,7 +46,7 @@ fun ChallengeCategoryScreen(
 @Composable
 private fun ChallengeCategoryScreen(
     challengeUiState: ChallengeCategoryUiState,
-    onCategoryClick: (Long) -> Unit,
+    onCategoryClick: (Int) -> Unit,
     onBack: () -> Unit
 ) {
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {

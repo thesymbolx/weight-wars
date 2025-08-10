@@ -40,6 +40,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:network")) // Added this line
     implementation(project(":core:data"))
     implementation(project(":core:database"))
     implementation(project(":core:domain"))

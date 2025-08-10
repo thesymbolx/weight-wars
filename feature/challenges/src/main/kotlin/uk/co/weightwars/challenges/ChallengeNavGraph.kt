@@ -16,7 +16,7 @@ import uk.co.weightwars.challenges.creation.ChallengeCreationScreen
 object ChallengeCategoryRoute
 
 @Serializable
-data class ChallengeRoute(val categoryId: Long)
+data class ChallengeRoute(val categoryId: Int)
 
 @Serializable
 object ChallengeCreationRoute

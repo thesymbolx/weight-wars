@@ -1,6 +1,5 @@
 package uk.co.weightwars.data.models
 
-import androidx.room.PrimaryKey
 import uk.co.weightwars.database.entities.ActiveChallengeEntity
 import uk.co.weightwars.database.entities.ChallengeInfoEntity
 import uk.co.weightwars.database.entities.ParticipantEntity
@@ -66,7 +65,7 @@ data class Participant(
 )
 
 data class SubChallenge(
-    val subChallengeId: Long,
+    val subChallengeId: Int,
     val title: String,
     val scores: Set<Score> = emptySet(),
     val lengthInDays: Int
@@ -107,7 +106,7 @@ fun ActiveChallengeEntity.toActiveChallenge() =
         isHardcoreMode = challengeInfoEntity.isHardcoreMode,
         subChallenges = subChallenges.map { subChallenge ->
             SubChallenge(
-                subChallengeId = subChallenge.subChallengeId,
+                subChallengeId = subChallenge.subChallengeId.toInt(),
                 title = subChallenge.title,
                 lengthInDays = subChallenge.lengthInDays,
                 scores = subChallenge.scores.map { score ->

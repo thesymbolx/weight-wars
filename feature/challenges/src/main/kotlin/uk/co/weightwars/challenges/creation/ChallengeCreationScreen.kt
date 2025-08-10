@@ -43,7 +43,7 @@ import uk.co.weightwars.ui.parallaxLayoutModifier
 
 @Composable
 fun ChallengeCreationScreen(
-    challenge: Long?,
+    challenge: Int?,
     viewModel: ChallengeCreationViewModel = hiltViewModel(),
     addChallengeClick: () -> Unit,
     onBack: () -> Unit

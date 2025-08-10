@@ -30,7 +30,7 @@ data class ChallengeState(
 )
 
 data class ChallengeDayState(
-    val id: Long,
+    val id: Int,
     val localDate: LocalDate,
     val formattedDate: String,
     val dayName: String,
@@ -88,7 +88,7 @@ class ActiveChallengeViewModel @Inject constructor(
         initialValue = ActiveChallengeState()
     )
 
-    fun score(challengeId: Long, date: LocalDate) = viewModelScope.launch(Dispatchers.IO) {
+    fun score(challengeId: Int, date: LocalDate) = viewModelScope.launch(Dispatchers.IO) {
 //        val scoredFullMark = date == LocalDate.now()
 //        val challengeItems = activeChallengeEntity.activeChallengeItemEntities.toMutableList()
 //        var challengeItem = challengeItems.first { challengeId == it.activeChallengeItemId }

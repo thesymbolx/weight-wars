@@ -27,15 +27,15 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import uk.co.weightwars.challenges.R
-import uk.co.weightwars.database.entities.Challenge
+import uk.co.weightwars.data.models.Challenge
 import uk.co.weightwars.designsystem.WeightWarsTheme
 import uk.co.weightwars.ui.parallaxLayoutModifier
 
 @Composable
 fun ChallengeScreen(
-    categoryId: Long,
+    categoryId: Int,
     viewModel: ChallengeViewModel = hiltViewModel(),
-    onChallengeClick: (Long) -> Unit,
+    onChallengeClick: (Int) -> Unit,
     onBack: () -> Unit
 ) {
     val state = viewModel.uiState
@@ -127,14 +127,12 @@ private fun ChallengeScreenPreview() {
                         title = "Challenge 1",
                         description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
                         days = 10,
-                        categoryId = 1
                     ),
                     Challenge(
                         challengeId = 2,
                         title = "Challenge 2",
                         description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
                         days = 10,
-                        categoryId = 1
                     )
                 ),
             ),
