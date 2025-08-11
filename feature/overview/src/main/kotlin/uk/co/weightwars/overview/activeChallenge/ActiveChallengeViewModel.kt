@@ -53,8 +53,8 @@ class ActiveChallengeViewModel @Inject constructor(
 
         val challengeState = activeChallenge.subChallenges.map { challenge ->
             val consecutiveDate = consecutiveDateUseCase(
-                activeChallenge.startDate,
-                challenge.lengthInDays
+                date = activeChallenge.startDate,
+                daysCount = challenge.lengthInDays
             )
 
 //            ChallengeState(

@@ -15,12 +15,13 @@ data class FirebaseActiveChallenge(
             "startDate" to startDate,
             "days" to days,
             "isHardcoreMode" to isHardcoreMode,
+            "subChallenges" to subChallenges
         )
     }
 }
 
 data class FirebaseSubChallenge(
-    val subChallengeId: Int,
-    val title: String,
-    val lengthInDays: Int,
+    val subChallengeId: Int = -1,
+    val title: String = "",
+    val lengthInDays: Int = -1,
 )
