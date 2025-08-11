@@ -124,12 +124,11 @@ class ChallengeCreationViewModel @Inject constructor(
 
         with(Dispatchers.IO) {
             activeChallengeRepo.createActiveChallenge(
-                ActiveChallenge(
+                activeChallenge = ActiveChallenge(
                     title = challenges.joinToString(separator = ", ") { it.title },
                     startDate = LocalDate.now(),
                     days = activeChallengeLength,
                     isHardcoreMode = hardCoreMode,
-                    participants = participants.map { it.id } + currentUser!!.profile.profileId,
                     subChallenges = challenges.map { challenge ->
                         SubChallenge(
                             subChallengeId = challenge.challengeId,
@@ -137,7 +136,8 @@ class ChallengeCreationViewModel @Inject constructor(
                             lengthInDays = challenge.days
                         )
                     }
-                )
+                ),
+                participantIds = participants.map { it.id } + currentUser!!.profile.profileId
             )
         }
 

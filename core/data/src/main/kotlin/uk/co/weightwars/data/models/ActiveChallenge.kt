@@ -1,73 +1,27 @@
 package uk.co.weightwars.data.models
 
-import uk.co.weightwars.database.entities.ActiveChallengeEntity
-import uk.co.weightwars.database.entities.ChallengeInfoEntity
-import uk.co.weightwars.database.entities.ParticipantEntity
-import uk.co.weightwars.database.entities.ScoreEntity
-import uk.co.weightwars.database.entities.SubChallengeEntity
 import uk.co.weightwars.network.model.FirebaseActiveChallenge
+import uk.co.weightwars.network.model.FirebaseSubChallenge
 import java.time.LocalDate
 import kotlin.String
 
 data class ActiveChallenge(
-    val challengeInfoId: String = "",
+    val activeChallengeId: String = "",
     val title: String,
     val startDate: LocalDate,
     val days: Int,
     val isHardcoreMode: Boolean,
-    val participants: List<String>,
     val subChallenges: List<SubChallenge>
-) {
-    fun toNetworkChallenge() =
-        FirebaseActiveChallenge(
-            id = "",
-            title = this.title,
-            startDate = this.startDate.toString(),
-            days = this.days,
-            isHardcoreMode = this.isHardcoreMode,
-            participantsIds = this.participants.map { it },
-            subChallengeIds = this.subChallenges.map { it.subChallengeId }
-        )
-
-    fun toActiveChallengeEntity(challengeId: String) =
-        ActiveChallengeEntity(
-            challengeInfoEntity = ChallengeInfoEntity(
-                challengeInfoId = challengeId,
-                title = title,
-                startDate = startDate,
-                days = days,
-                isHardcoreMode = isHardcoreMode
-            ),
-            subChallenges = subChallenges.map { subChallenge ->
-                SubChallengeEntity(
-                    title = subChallenge.title,
-                    lengthInDays = subChallenge.lengthInDays,
-                    scores = subChallenge.scores.map { score ->
-                        ScoreEntity(
-                            localDate = score.localDate,
-                            score = score.score,
-                            mark = score.mark.name
-                        )
-                    }
-                )
-            },
-            participants = participants.map {
-                ParticipantEntity(
-                    participantId = it,
-                    challengeInfoParentId = challengeId
-                )
-            }
-        )
-}
+)
 
 data class Participant(
     val participantId: Long,
+    val name: String,
 )
 
 data class SubChallenge(
     val subChallengeId: Int,
     val title: String,
-    val scores: Set<Score> = emptySet(),
     val lengthInDays: Int
 )
 
@@ -75,21 +29,7 @@ data class Score(
     val localDate: LocalDate,
     val score: Int,
     val mark: ScoreMark
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Score) return false
-        return localDate == other.localDate
-    }
-
-    override fun hashCode(): Int {
-        return localDate.hashCode()
-    }
-
-    override fun toString(): String {
-        return "ScoredDate(localDate=$localDate, score=$score, mark=$mark)"
-    }
-}
+)
 
 enum class ScoreMark {
     FULL,
@@ -97,45 +37,34 @@ enum class ScoreMark {
     NONE
 }
 
-fun ActiveChallengeEntity.toActiveChallenge() =
-    ActiveChallenge(
-        challengeInfoId = challengeInfoEntity.challengeInfoId,
-        title = challengeInfoEntity.title,
-        startDate = challengeInfoEntity.startDate,
-        days = challengeInfoEntity.days,
-        isHardcoreMode = challengeInfoEntity.isHardcoreMode,
-        subChallenges = subChallenges.map { subChallenge ->
-            SubChallenge(
-                subChallengeId = subChallenge.subChallengeId.toInt(),
-                title = subChallenge.title,
-                lengthInDays = subChallenge.lengthInDays,
-                scores = subChallenge.scores.map { score ->
-                    Score(
-                        localDate = score.localDate,
-                        mark = ScoreMark.valueOf(score.mark),
-                        score = score.score
-                    )
-                }.toSet()
-            )
-        },
-        participants = participants.map { it.participantId }
-    )
-
-fun FirebaseActiveChallenge.toActiveChallengeEntity() =
-    ActiveChallengeEntity(
-        challengeInfoEntity = ChallengeInfoEntity(
-            challengeInfoId = id,
-            title = title,
-            startDate = LocalDate.parse(startDate),
-            days = days,
-            isHardcoreMode = false,
-        ),
-        subChallenges = emptyList(),
-        participants = participantsIds.map { participantId ->
-            ParticipantEntity(
-                participantId = participantId,
-                challengeInfoParentId = id
+fun ActiveChallenge.toNetworkChallenge() =
+    FirebaseActiveChallenge(
+        activeChallengeId = activeChallengeId,
+        title = this.title,
+        startDate = this.startDate.toString(),
+        days = this.days,
+        isHardcoreMode = this.isHardcoreMode,
+        subChallenges = this.subChallenges.map {
+            FirebaseSubChallenge(
+                subChallengeId = it.subChallengeId,
+                title = it.title,
+                lengthInDays = it.lengthInDays
             )
         }
     )
 
+fun FirebaseActiveChallenge.toActiveChallenge() =
+    ActiveChallenge(
+        activeChallengeId = activeChallengeId,
+        title = this.title,
+        startDate = LocalDate.parse(startDate),
+        days = this.days,
+        isHardcoreMode = this.isHardcoreMode,
+        subChallenges = this.subChallenges.map {
+            SubChallenge(
+                subChallengeId = it.subChallengeId,
+                title = it.title,
+                lengthInDays = it.lengthInDays
+            )
+        }
+    )

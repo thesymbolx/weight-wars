@@ -1,22 +1,26 @@
 package uk.co.weightwars.network.model
 
 data class FirebaseActiveChallenge(
-    val id: String = "",
+    val activeChallengeId: String = "",
     val title: String = "",
     val startDate: String = "",
     val days: Int = 0,
     val isHardcoreMode: Boolean = false,
-    val participantsIds: List<String> = listOf(),
-    val subChallengeIds: List<Int> = listOf()
+    val subChallenges: List<FirebaseSubChallenge> = listOf()
 ) {
     fun toMap(): Map<String, Any?> {
         return mapOf(
-            "id" to id,
+            "activeChallengeId" to activeChallengeId,
             "title" to title,
             "startDate" to startDate,
             "days" to days,
             "isHardcoreMode" to isHardcoreMode,
-            "participantsIds" to participantsIds,
         )
     }
 }
+
+data class FirebaseSubChallenge(
+    val subChallengeId: Int,
+    val title: String,
+    val lengthInDays: Int,
+)

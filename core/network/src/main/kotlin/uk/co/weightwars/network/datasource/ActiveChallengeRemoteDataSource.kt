@@ -18,17 +18,20 @@ class ActiveChallengeRemoteDataSource @Inject constructor(
     val activeChallengeChild = "activeChallenge"
     val usersChild = "users"
 
-    suspend fun createActiveChallenge(firebaseActiveChallenge: FirebaseActiveChallenge) : String {
+    suspend fun createActiveChallenge(
+        firebaseActiveChallenge: FirebaseActiveChallenge,
+        participantsIds: List<String>
+    ) : String {
         val activeChallengeKey = firebaseDatabase.child(activeChallengeChild).push().key ?: throw Exception()
 
         val challengeWithId = firebaseActiveChallenge.copy(
-            id = activeChallengeKey
+            activeChallengeId = activeChallengeKey
         )
 
         val childUpdates = hashMapOf<String, Any>(
             "/$activeChallengeChild/$activeChallengeKey" to challengeWithId.toMap(),
         )
-        for (participantId in firebaseActiveChallenge.participantsIds) {
+        for (participantId in participantsIds) {
             val userActiveChallengePath = "/$usersChild/${participantId}/activeChallenges"
             val existingActiveChallengesSnapshot = firebaseDatabase.child(userActiveChallengePath).get().await()
             val existingActiveChallenges = existingActiveChallengesSnapshot.getValue<List<String>>()?.toMutableList()

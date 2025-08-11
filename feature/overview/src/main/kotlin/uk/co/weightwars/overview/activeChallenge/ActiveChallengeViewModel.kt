@@ -57,29 +57,52 @@ class ActiveChallengeViewModel @Inject constructor(
                 challenge.lengthInDays
             )
 
+//            ChallengeState(
+//                name = challenge.title,
+//                totalScore = challenge.scores.sumOf { it.score },
+//                challengeDate = consecutiveDate.map { date ->
+//                    val score = challenge.scores.firstOrNull { it.localDate == date.localDate }
+//
+//                    ChallengeDayState(
+//                        id = challenge.subChallengeId,
+//                        localDate = date.localDate,
+//                        formattedDate = date.formattedDate,
+//                        dayName = date.dayName,
+//                        score = score?.score ?: 0,
+//                        mark = score?.mark ?: ScoreMark.NONE
+//                    )
+//                }
+//            )
+
             ChallengeState(
                 name = challenge.title,
-                totalScore = challenge.scores.sumOf { it.score },
+                totalScore = 10,
                 challengeDate = consecutiveDate.map { date ->
-                    val score = challenge.scores.firstOrNull { it.localDate == date.localDate }
+                   // val score = challenge.scores.firstOrNull { it.localDate == date.localDate }
 
                     ChallengeDayState(
                         id = challenge.subChallengeId,
                         localDate = date.localDate,
                         formattedDate = date.formattedDate,
                         dayName = date.dayName,
-                        score = score?.score ?: 0,
-                        mark = score?.mark ?: ScoreMark.NONE
+                        score =  0,
+                        mark = ScoreMark.NONE
                     )
                 }
             )
         }
 
+//        ActiveChallengeState(
+//            name = activeChallenge.title,
+//            totalScore = activeChallenge.subChallenges.sumOf { score ->
+//                score.scores.sumOf { it.score }
+//            },
+//            challenges = challengeState
+//        )
+
         ActiveChallengeState(
             name = activeChallenge.title,
-            totalScore = activeChallenge.subChallenges.sumOf { score ->
-                score.scores.sumOf { it.score }
-            },
+            totalScore = 10,
             challenges = challengeState
         )
     }.stateIn(

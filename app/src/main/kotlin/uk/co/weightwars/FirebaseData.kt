@@ -3,6 +3,48 @@ package uk.co.weightwars
 import com.google.firebase.database.FirebaseDatabase
 import uk.co.weightwars.network.model.FirebaseChallenge
 import uk.co.weightwars.network.model.FirebaseChallengeCategory
+import uk.co.weightwars.network.model.FirebaseUser
+
+fun initUserData() {
+    val ref = FirebaseDatabase.getInstance().reference.child("users")
+    users.forEach { user ->
+        ref.child(user.id).setValue(user)
+    }
+}
+
+val users: List<FirebaseUser> =
+    listOf(
+        FirebaseUser(
+            id = "1",
+            name = "John Doe",
+            // Add other user properties here
+        ),
+        FirebaseUser(
+            id = "2",
+            name = "Jane Smith",
+            // Add other user properties here
+        ),
+        FirebaseUser(
+            id = "3",
+            name = "Michael Johnson",
+            // Add other user properties here
+        ),
+        FirebaseUser(
+            id = "4",
+            name = "Emily Davis",
+            // Add other user properties here
+        ),
+        FirebaseUser(
+            id = "5",
+            name = "David Wilson",
+            // Add other user properties here
+        ),
+        FirebaseUser(
+            id = "6",
+            name = "Sophia Martinez",
+        )
+    )
+
 
 fun initChallengeData() {
     val ref = FirebaseDatabase.getInstance().reference.child("challenges")
