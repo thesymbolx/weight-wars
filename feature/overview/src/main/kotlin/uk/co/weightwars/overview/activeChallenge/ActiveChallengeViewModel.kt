@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import uk.co.weightwars.data.models.ActiveChallenge
 import uk.co.weightwars.data.models.ScoreMark
 import uk.co.weightwars.data.repository.ActiveChallengeRepo
-import uk.co.weightwars.database.entities.ActiveChallengeEntity
+import uk.co.weightwars.data.repository.ActiveChallengeWithScores
 import uk.co.weightwars.domain.ConsecutiveDateUseCase
 import java.time.LocalDate
 
@@ -35,16 +35,15 @@ data class ChallengeDayState(
     val formattedDate: String,
     val dayName: String,
     val score: Int,
-    val mark: ScoreMark,
 )
 
 @HiltViewModel
 class ActiveChallengeViewModel @Inject constructor(
-    private val activeChallengeRepo: ActiveChallengeRepo,
+    activeChallengeRepo: ActiveChallengeRepo,
     private val consecutiveDateUseCase: ConsecutiveDateUseCase,
     savedState: SavedStateHandle
 ) : ViewModel() {
-    lateinit var activeChallengeEntity: ActiveChallenge
+    lateinit var activeChallengeEntity: ActiveChallengeWithScores
 
     val id = savedState.get<String>("activeChallengeId") ?: throw Exception()
 
@@ -57,52 +56,28 @@ class ActiveChallengeViewModel @Inject constructor(
                 daysCount = challenge.lengthInDays
             )
 
-//            ChallengeState(
-//                name = challenge.title,
-//                totalScore = challenge.scores.sumOf { it.score },
-//                challengeDate = consecutiveDate.map { date ->
-//                    val score = challenge.scores.firstOrNull { it.localDate == date.localDate }
-//
-//                    ChallengeDayState(
-//                        id = challenge.subChallengeId,
-//                        localDate = date.localDate,
-//                        formattedDate = date.formattedDate,
-//                        dayName = date.dayName,
-//                        score = score?.score ?: 0,
-//                        mark = score?.mark ?: ScoreMark.NONE
-//                    )
-//                }
-//            )
-
             ChallengeState(
                 name = challenge.title,
-                totalScore = 10,
+                totalScore = challenge.scores.sumOf { it.score },
                 challengeDate = consecutiveDate.map { date ->
-                   // val score = challenge.scores.firstOrNull { it.localDate == date.localDate }
+                    val score = challenge.scores.firstOrNull { it.localDate == date.localDate }
 
                     ChallengeDayState(
                         id = challenge.subChallengeId,
                         localDate = date.localDate,
                         formattedDate = date.formattedDate,
                         dayName = date.dayName,
-                        score =  0,
-                        mark = ScoreMark.NONE
+                        score = score?.score ?: 0,
                     )
                 }
             )
         }
 
-//        ActiveChallengeState(
-//            name = activeChallenge.title,
-//            totalScore = activeChallenge.subChallenges.sumOf { score ->
-//                score.scores.sumOf { it.score }
-//            },
-//            challenges = challengeState
-//        )
-
         ActiveChallengeState(
             name = activeChallenge.title,
-            totalScore = 10,
+            totalScore = activeChallenge.subChallenges.sumOf { score ->
+                score.scores.sumOf { it.score }
+            },
             challenges = challengeState
         )
     }.stateIn(
@@ -112,6 +87,9 @@ class ActiveChallengeViewModel @Inject constructor(
     )
 
     fun score(challengeId: Int, date: LocalDate) = viewModelScope.launch(Dispatchers.IO) {
+
+
+
 //        val scoredFullMark = date == LocalDate.now()
 //        val challengeItems = activeChallengeEntity.activeChallengeItemEntities.toMutableList()
 //        var challengeItem = challengeItems.first { challengeId == it.activeChallengeItemId }

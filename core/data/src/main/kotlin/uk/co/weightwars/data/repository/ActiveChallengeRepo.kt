@@ -1,5 +1,7 @@
 package uk.co.weightwars.data.repository
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
@@ -12,31 +14,68 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import uk.co.weightwars.data.models.ActiveChallenge
 import uk.co.weightwars.data.models.Participant
+import uk.co.weightwars.data.models.SubChallenge
 import uk.co.weightwars.data.models.toActiveChallenge
 import uk.co.weightwars.data.models.toNetworkChallenge
 import uk.co.weightwars.database.dao.UserDao
 import uk.co.weightwars.network.datasource.ActiveChallengeRemoteDataSource
+import uk.co.weightwars.network.datasource.ScoreRemoteDataSource
+import uk.co.weightwars.network.model.FirebaseScore
+import java.time.LocalDate
 import javax.inject.Inject
+import kotlin.Int
 
 class ActiveChallengeRepo @Inject constructor(
     private val userDao: UserDao,
-    private val activeChallengeRemoteDataSource: ActiveChallengeRemoteDataSource
+    private val activeChallengeRemoteDataSource: ActiveChallengeRemoteDataSource,
+    private val scoreRemoteDataSource: ScoreRemoteDataSource
 ) {
-    fun getActiveChallenge(id: String): Flow<ActiveChallenge> =
-        activeChallengeRemoteDataSource.getActiveChallenge(id).map {
-            it.toActiveChallenge()
+    fun getActiveChallenge(id: String): Flow<ActiveChallengeWithScores> = flow {
+        val currentUserId: String = withContext(Dispatchers.IO) {
+            userDao.getCurrentUser()!!.profile.profileId
         }
+
+        activeChallengeRemoteDataSource.getActiveChallenge(id).flatMapLatest { firebaseActiveChallenge ->
+            scoreRemoteDataSource.getScores(currentUserId, id).map { scores ->
+                val activeChallenge = firebaseActiveChallenge.toActiveChallenge()
+
+                val scores = activeChallenge.subChallenges.map { subChallenge ->
+                    SubChallengeWithScore(
+                        subChallengeId = subChallenge.subChallengeId ,
+                        title = subChallenge.title,
+                        scores = scores.map { score ->
+                            Score(
+                                localDate = LocalDate.parse(score.date),
+                                score = score.score
+                            )
+                        },
+                        lengthInDays = subChallenge.lengthInDays
+                    )
+                }
+
+                with(activeChallenge) {
+                    ActiveChallengeWithScores(
+                        activeChallengeId,
+                        title,
+                        startDate,
+                        days,
+                        isHardcoreMode,
+                        scores
+                    )
+                }
+
+            }
+
+
+        }
+
+    }
+
 
     fun getActiveChallenges(): Flow<ActiveChallenge> = flow {
-        val currentUserId: String? = withContext(Dispatchers.IO) {
-            val currentUserId = userDao.getCurrentUser()?.profile?.profileId
-            if (currentUserId == null) {
-                emitAll(emptyFlow())
-            }
-            currentUserId
+        val currentUserId: String = withContext(Dispatchers.IO) {
+            userDao.getCurrentUser()!!.profile.profileId
         }
-
-        if(currentUserId == null) return@flow
 
         emitAll(
             activeChallengeRemoteDataSource.getUserActiveChallenges(currentUserId).flatMapLatest { userActiveChallengeIds ->
@@ -57,4 +96,34 @@ class ActiveChallengeRepo @Inject constructor(
     suspend fun createActiveChallenge(activeChallenge: ActiveChallenge, participantIds: List<String>) {
          activeChallengeRemoteDataSource.createActiveChallenge(activeChallenge.toNetworkChallenge(), participantIds)
     }
+
+    suspend fun setScores(
+        userId: String,
+        activityId: String,
+        challengeId: String,
+        scores: List<FirebaseScore>
+    ) {
+        scoreRemoteDataSource.setScores(userId, activityId, scores)
+    }
 }
+
+data class ActiveChallengeWithScores(
+    val activeChallengeId: String = "",
+    val title: String,
+    val startDate: LocalDate,
+    val days: Int,
+    val isHardcoreMode: Boolean,
+    val subChallenges: List<SubChallengeWithScore>
+)
+
+data class SubChallengeWithScore(
+    val subChallengeId: Int ,
+    val title: String,
+    val scores: List<Score>,
+    val lengthInDays: Int
+)
+
+data class Score(
+    val localDate: LocalDate,
+    val score: Int
+)
