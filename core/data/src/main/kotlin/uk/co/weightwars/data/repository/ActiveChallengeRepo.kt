@@ -40,10 +40,13 @@ class ActiveChallengeRepo @Inject constructor(
                 val activeChallenge = firebaseActiveChallenge.toActiveChallenge()
 
                 val scores = activeChallenge.subChallenges.map { subChallenge ->
+
+                    val whoCares: List<FirebaseScore> = scores.get(firebaseActiveChallenge.activeChallengeId) ?: emptyList()
+
                     SubChallengeWithScore(
                         subChallengeId = subChallenge.subChallengeId ,
                         title = subChallenge.title,
-                        scores = scores.map { score ->
+                        scores = whoCares.map { score ->
                             Score(
                                 localDate = LocalDate.parse(score.date),
                                 score = score.score
@@ -65,8 +68,6 @@ class ActiveChallengeRepo @Inject constructor(
                 }
 
             }
-
-
         }
 
     }
@@ -98,12 +99,25 @@ class ActiveChallengeRepo @Inject constructor(
     }
 
     suspend fun setScores(
-        userId: String,
-        activityId: String,
-        challengeId: String,
-        scores: List<FirebaseScore>
+        activeChallengeWithScores: ActiveChallengeWithScores
     ) {
-        scoreRemoteDataSource.setScores(userId, activityId, scores)
+        val userId: String = withContext(Dispatchers.IO) {
+            userDao.getCurrentUser()!!.profile.profileId
+        }
+
+        scoreRemoteDataSource.setScores(
+            userId = userId,
+            activeChallengeId = activeChallengeWithScores.activeChallengeId,
+            scores = activeChallengeWithScores.subChallenges.flatMap {
+                it.scores.map { score ->
+                    FirebaseScore(
+                        challengeId = activeChallengeWithScores.activeChallengeId,
+                        date = score.localDate.toString(),
+                        score = score.score
+                    )
+                }
+            }
+        )
     }
 }
 

@@ -25,17 +25,23 @@ class ScoreRemoteDataSource @Inject constructor(
             .child(userId)
             .child(activeChallengeId)
 
-        ref.setValue(scores)
+
+        ref.setValue(scores.toList())
     }
 
     fun getScores(
         userId: String,
         activeChallengeId: String,
-    ) = callbackFlow {
+    ) = callbackFlow<Map<String, List<FirebaseScore>>> {
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val score = snapshot.getValue<List<FirebaseScore>>()
-                trySend(score ?: emptyList())
+                val scoresFromFirebase = snapshot.getValue<List<FirebaseScore>>()
+
+                val groupedScores: Map<String, List<FirebaseScore>> = scoresFromFirebase?.groupBy {
+                    it.challengeId
+                } ?: emptyMap()
+
+                trySend(groupedScores)
             }
 
             override fun onCancelled(error: DatabaseError) {}

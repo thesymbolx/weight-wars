@@ -10,12 +10,11 @@ import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import uk.co.weightwars.data.models.ActiveChallenge
-import uk.co.weightwars.data.models.ScoreMark
 import uk.co.weightwars.data.repository.ActiveChallengeRepo
 import uk.co.weightwars.data.repository.ActiveChallengeWithScores
 import uk.co.weightwars.domain.ConsecutiveDateUseCase
 import java.time.LocalDate
+import uk.co.weightwars.data.repository.Score
 
 data class ActiveChallengeState(
     val name: String = "",
@@ -39,16 +38,16 @@ data class ChallengeDayState(
 
 @HiltViewModel
 class ActiveChallengeViewModel @Inject constructor(
-    activeChallengeRepo: ActiveChallengeRepo,
+    private val activeChallengeRepo: ActiveChallengeRepo,
     private val consecutiveDateUseCase: ConsecutiveDateUseCase,
     savedState: SavedStateHandle
 ) : ViewModel() {
-    lateinit var activeChallengeEntity: ActiveChallengeWithScores
+    lateinit var activeChallenge: ActiveChallengeWithScores
 
     val id = savedState.get<String>("activeChallengeId") ?: throw Exception()
 
     val uiState = activeChallengeRepo.getActiveChallenge(id).map { activeChallenge ->
-        this.activeChallengeEntity = activeChallenge
+        this.activeChallenge = activeChallenge
 
         val challengeState = activeChallenge.subChallenges.map { challenge ->
             val consecutiveDate = consecutiveDateUseCase(
@@ -88,31 +87,31 @@ class ActiveChallengeViewModel @Inject constructor(
 
     fun score(challengeId: Int, date: LocalDate) = viewModelScope.launch(Dispatchers.IO) {
 
+        val scoredFullMark = date == LocalDate.now()
+        val challengeItems = activeChallenge.subChallenges.toMutableList()
+        var challengeItem = challengeItems.first { challengeId == it.subChallengeId }
+        val scores = challengeItem.scores.toMutableSet()
+
+        scores.add(
+            Score(
+                localDate = date,
+                score = if (scoredFullMark) 20 else 10
+            )
+        )
+
+        challengeItem = challengeItem.copy(
+            scores = scores.toList()
+        )
+
+        challengeItems.add(challengeItem)
+
+        activeChallenge = activeChallenge.copy(
+            subChallenges = challengeItems
+        )
 
 
-//        val scoredFullMark = date == LocalDate.now()
-//        val challengeItems = activeChallengeEntity.activeChallengeItemEntities.toMutableList()
-//        var challengeItem = challengeItems.first { challengeId == it.activeChallengeItemId }
-//        val scores = challengeItem.scoreEntities.toMutableSet()
-//
-//        scores.add(
-//            ScoreEntity(
-//                localDate = date,
-//                score = if (scoredFullMark) 20 else 10,
-//                mark = if (scoredFullMark) ScoreMark.FULL else ScoreMark.HALF
-//            )
-//        )
-//
-//        challengeItem = challengeItem.copy(
-//            scoreEntities = scores
-//        )
-//
-//        challengeItems.add(challengeItem)
-//
-//        activeChallengeEntity = activeChallengeEntity.copy(
-//            activeChallengeItemEntities = challengeItems
-//        )
-//
-//        activeChallengeRepo.updateActiveChallenge(activeChallengeEntity)
+        activeChallengeRepo.setScores(
+            activeChallenge
+        )
     }
 }
