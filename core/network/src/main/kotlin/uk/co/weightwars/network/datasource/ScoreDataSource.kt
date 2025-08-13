@@ -32,12 +32,12 @@ class ScoreRemoteDataSource @Inject constructor(
     fun getScores(
         userId: String,
         activeChallengeId: String,
-    ) = callbackFlow<Map<String, List<FirebaseScore>>> {
+    ) = callbackFlow<Map<Int, List<FirebaseScore>>> {
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val scoresFromFirebase = snapshot.getValue<List<FirebaseScore>>()
 
-                val groupedScores: Map<String, List<FirebaseScore>> = scoresFromFirebase?.groupBy {
+                val groupedScores: Map<Int, List<FirebaseScore>> = scoresFromFirebase?.groupBy {
                     it.challengeId
                 } ?: emptyMap()
 
