@@ -92,6 +92,8 @@ class ActiveChallengeViewModel @Inject constructor(
         var challengeItem = challengeItems.first { challengeId == it.subChallengeId }
         val scores = challengeItem.scores.toMutableSet()
 
+        scores.removeIf { it.localDate == date }
+
         scores.add(
             Score(
                 localDate = date,
