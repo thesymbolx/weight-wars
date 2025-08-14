@@ -18,6 +18,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -94,7 +95,29 @@ fun ChallengeCreationScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            AddChallenge(addChallengeClick)
+            // Improved Add Challenge Button
+            Button(
+                onClick = addChallengeClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Text(
+                    text = stringResource(R.string.add_challenge),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
 
             challengeCreationUiState.selectedChallengeState.forEach {
                 Text(
@@ -145,39 +168,6 @@ private fun Header(
             text = stringResource(R.string.create_challenge),
             style = MaterialTheme.typography.displaySmall
         )
-    }
-}
-
-@Composable
-private fun AddChallenge(
-    addChallengeClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .clickable(onClick = addChallengeClick)
-    ) {
-        HorizontalDivider()
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                modifier = Modifier.size(30.dp),
-                imageVector = Icons.Filled.Add,
-                contentDescription = null
-            )
-
-            Text(
-                modifier = Modifier.padding(start = 16.dp),
-                text = "Add Challenge",
-                style = MaterialTheme.typography.headlineSmall
-            )
-        }
-
-        HorizontalDivider()
     }
 }
 
