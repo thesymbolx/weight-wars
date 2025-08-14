@@ -2,7 +2,9 @@ package uk.co.weightwars.overview.activeChallenge
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,8 +12,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -19,6 +24,8 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,7 +38,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -89,13 +98,95 @@ fun ActiveChallengeScreen(
 
 @Composable
 private fun LeagueTable(participants: List<ParticipantState>) {
-    Column {
-        participants.forEach {
-            Row {
-                Text(modifier = Modifier.weight(1f), text = it.name)
-                Text("${it.totalScore}")
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Leaderboard",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            
+            participants.sortedByDescending { it.totalScore }.forEachIndexed { index, participant ->
+                LeagueTableRow(
+                    rank = index + 1,
+                    participant = participant,
+                    isTopThree = index < 3
+                )
+                
+                if (index < participants.size - 1) {
+                    Divider(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun LeagueTableRow(
+    rank: Int,
+    participant: ParticipantState,
+    isTopThree: Boolean
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Rank badge
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .background(
+                    color = when (rank) {
+                        1 -> Color(0xFFFFD700) // Gold
+                        2 -> Color(0xFFC0C0C0) // Silver
+                        3 -> Color(0xFFCD7F32) // Bronze
+                        else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                    },
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "#$rank",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = if (isTopThree) Color.Black else MaterialTheme.colorScheme.primary
+            )
+        }
+        
+        Spacer(modifier = Modifier.width(12.dp))
+        
+        // Participant name
+        Text(
+            text = participant.name,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = if (isTopThree) FontWeight.Bold else FontWeight.Normal,
+            modifier = Modifier.weight(1f)
+        )
+        
+        // Score
+        Text(
+            text = "${participant.totalScore}",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
