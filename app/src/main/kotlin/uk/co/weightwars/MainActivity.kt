@@ -74,7 +74,11 @@ fun App(currentUserSet: Boolean) {
                     NasaBottomNavigation(appState)
                 },
             ) { innerPadding ->
-                Box(modifier = Modifier.padding(innerPadding)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = innerPadding.calculateBottomPadding())
+                ) {
                     if (currentUserSet) {
                         AppNavHost(navController, appState)
                     } else {
