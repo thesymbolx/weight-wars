@@ -234,59 +234,168 @@ private fun ChallengeCard(
             .fillMaxWidth()
             .wrapContentHeight()
             .animateContentSize()
+            .padding(horizontal = 16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column {
-            Row {
-                Column(modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
+            // Header section with challenge info and expand/collapse button
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
                     .clickable { expanded = !expanded }
+                    .padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Text(text = challenge.name)
-
-                    Text(text = "Total points: ${challenge.totalScore}")
+                    Text(
+                        text = challenge.name,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    
+                    Spacer(modifier = Modifier.height(4.dp))
+                    
+                    Text(
+                        text = "Total Score: ${challenge.totalScore}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
 
-                IconButton(
-                    onClick = {  expanded = !expanded }
+                // Expand/collapse button with better styling
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(imageVector =
-                        if(expanded)Icons.Filled.KeyboardArrowUp else Icons.Filled.ArrowDropDown,
-                        contentDescription = null
+                    Icon(
+                        imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.ArrowDropDown,
+                        contentDescription = if (expanded) "Collapse" else "Expand",
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
 
+            // Expanded content with daily challenges
             if (expanded) {
-                challenge.challengeDate.forEach {
-                    HorizontalDivider()
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = "${it.formattedDate} ${it.dayName}"
+                Divider(
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                    thickness = 1.dp
+                )
+                
+                Column(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
+                ) {
+                    Text(
+                        text = "Daily Progress",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    
+                    challenge.challengeDate.forEach { dayState ->
+                        DayChallengeRow(
+                            dayState = dayState,
+                            onScoreClick = onScoreClick
                         )
-
-                        IconButton(
-                            onClick = { onScoreClick(it.id, it.localDate) }
-                        ) {
-                            Icon(imageVector = Icons.Filled.Done, contentDescription = null)
+                        
+                        if (dayState != challenge.challengeDate.last()) {
+                            Divider(
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                            )
                         }
-
-                        Text(
-                            modifier = Modifier.padding(start = 16.dp),
-                            text = "${it.score}"
-                        )
                     }
                 }
             }
-
         }
+    }
+}
+
+@Composable
+private fun DayChallengeRow(
+    dayState: ChallengeDayState,
+    onScoreClick: (Int, LocalDate) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Date and day info
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = dayState.formattedDate,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            
+            Text(
+                text = dayState.dayName,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        
+        // Score button with better styling
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .background(
+                    color = if (dayState.score > 0) 
+                        MaterialTheme.colorScheme.primary 
+                    else 
+                        MaterialTheme.colorScheme.surfaceVariant,
+                    shape = CircleShape
+                )
+                .clickable { onScoreClick(dayState.id, dayState.localDate) },
+            contentAlignment = Alignment.Center
+        ) {
+            if (dayState.score > 0) {
+                Icon(
+                    imageVector = Icons.Filled.Done,
+                    contentDescription = "Completed",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            } else {
+                Text(
+                    text = "+",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        // Score display
+        Text(
+            text = "${dayState.score}",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = if (dayState.score > 0) 
+                MaterialTheme.colorScheme.primary 
+            else 
+                MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
