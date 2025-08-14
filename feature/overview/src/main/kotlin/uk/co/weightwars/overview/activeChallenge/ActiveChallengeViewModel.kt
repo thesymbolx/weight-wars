@@ -15,6 +15,7 @@ import uk.co.weightwars.data.repository.ActiveChallengeWithScores
 import uk.co.weightwars.domain.ConsecutiveDateUseCase
 import java.time.LocalDate
 import uk.co.weightwars.data.repository.Score
+import uk.co.weightwars.data.repository.UserRepo
 
 data class ActiveChallengeState(
     val name: String = "",
@@ -45,6 +46,7 @@ data class ChallengeDayState(
 
 @HiltViewModel
 class ActiveChallengeViewModel @Inject constructor(
+    private val userRepo: UserRepo,
     private val activeChallengeRepo: ActiveChallengeRepo,
     private val consecutiveDateUseCase: ConsecutiveDateUseCase,
     savedState: SavedStateHandle
@@ -100,6 +102,7 @@ class ActiveChallengeViewModel @Inject constructor(
     )
 
     fun score(challengeId: Int, date: LocalDate) = viewModelScope.launch(Dispatchers.IO) {
+        val currentUser = userRepo.getCurrentUser()
 
         val scoredFullMark = date == LocalDate.now()
         val challengeItems = currentActiveChallenge.subChallenges.toMutableList()
@@ -126,10 +129,23 @@ class ActiveChallengeViewModel @Inject constructor(
             challengeItems.add(challengeItem)
         }
 
-        currentActiveChallenge = currentActiveChallenge.copy(
-            subChallenges = challengeItems
-        )
+        val person = currentActiveChallenge.participants.find { it.participantId == currentUser!!.profile.profileId }
+        val participants = currentActiveChallenge.participants.toMutableList()
 
+        person?.let {
+            val updatedPerson = it.copy(
+                total = it.total + if (scoredFullMark) 20 else 10
+            )
+            val personIndex = participants.indexOfFirst { p -> p.participantId == updatedPerson.participantId }
+            if (personIndex != -1) {
+                participants[personIndex] = updatedPerson
+            }
+        }
+
+        currentActiveChallenge = currentActiveChallenge.copy(
+            subChallenges = challengeItems,
+            participants = participants.toList()
+        )
 
         activeChallengeRepo.setScores(
             currentActiveChallenge
