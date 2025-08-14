@@ -42,12 +42,12 @@ class ActiveChallengeViewModel @Inject constructor(
     private val consecutiveDateUseCase: ConsecutiveDateUseCase,
     savedState: SavedStateHandle
 ) : ViewModel() {
-    lateinit var activeChallenge: ActiveChallengeWithScores
+    private lateinit var currentActiveChallenge: ActiveChallengeWithScores
 
     val id = savedState.get<String>("activeChallengeId") ?: throw Exception()
 
     val uiState = activeChallengeRepo.getActiveChallenge(id).map { activeChallenge ->
-        this.activeChallenge = activeChallenge
+        this.currentActiveChallenge = activeChallenge
 
         val challengeState = activeChallenge.subChallenges.map { challenge ->
             val consecutiveDate = consecutiveDateUseCase(
@@ -88,9 +88,9 @@ class ActiveChallengeViewModel @Inject constructor(
     fun score(challengeId: Int, date: LocalDate) = viewModelScope.launch(Dispatchers.IO) {
 
         val scoredFullMark = date == LocalDate.now()
-        val challengeItems = activeChallenge.subChallenges.toMutableList()
+        val challengeItems = currentActiveChallenge.subChallenges.toMutableList()
         var challengeItem = challengeItems.first { challengeId == it.subChallengeId }
-        val scores = challengeItem.scores.toMutableSet()
+        val scores = challengeItem.scores.toMutableList()
 
         scores.removeIf { it.localDate == date }
 
@@ -105,15 +105,20 @@ class ActiveChallengeViewModel @Inject constructor(
             scores = scores.toList()
         )
 
-        challengeItems.add(challengeItem)
+        val existingChallengeIndex = challengeItems.indexOfFirst { it.subChallengeId == challengeId }
+        if (existingChallengeIndex != -1) {
+            challengeItems[existingChallengeIndex] = challengeItem
+        } else {
+            challengeItems.add(challengeItem)
+        }
 
-        activeChallenge = activeChallenge.copy(
+        currentActiveChallenge = currentActiveChallenge.copy(
             subChallenges = challengeItems
         )
 
 
         activeChallengeRepo.setScores(
-            activeChallenge
+            currentActiveChallenge
         )
     }
 }

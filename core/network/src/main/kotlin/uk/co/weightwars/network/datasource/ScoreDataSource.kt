@@ -26,7 +26,7 @@ class ScoreRemoteDataSource @Inject constructor(
             .child(activeChallengeId)
 
 
-        ref.setValue(scores.toList())
+        ref.setValue(scores)
     }
 
     fun getScores(
