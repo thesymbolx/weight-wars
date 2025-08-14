@@ -116,6 +116,8 @@ class ActiveChallengeRepo @Inject constructor(
                 }
             }
         )
+
+        activeChallengeRemoteDataSource.updateActiveChallenge(activeChallengeWithScores.toFirebaseActiveChallenge())
     }
 }
 
@@ -140,3 +142,27 @@ data class Score(
     val localDate: LocalDate,
     val score: Int
 )
+
+fun ActiveChallengeWithScores.toFirebaseActiveChallenge() =
+    uk.co.weightwars.network.model.FirebaseActiveChallenge(
+        activeChallengeId = activeChallengeId,
+        title = title,
+        startDate = startDate.toString(),
+        days = days,
+        isHardcoreMode = isHardcoreMode,
+        subChallenges = subChallenges.map { subChallenge ->
+            uk.co.weightwars.network.model.FirebaseSubChallenge(
+                subChallengeId = subChallenge.subChallengeId,
+                title = subChallenge.title,
+                lengthInDays = subChallenge.lengthInDays
+            )
+        },
+        participants = participants.map { participant ->
+            uk.co.weightwars.network.model.FirebaseParticipant(
+                id = participant.participantId,
+                name = participant.name,
+                totalScore = participant.total
+            )
+        }
+    )
+

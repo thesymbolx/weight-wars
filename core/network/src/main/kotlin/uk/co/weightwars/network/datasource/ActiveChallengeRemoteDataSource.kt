@@ -37,6 +37,12 @@ class ActiveChallengeRemoteDataSource @Inject constructor(
         ref.setValue(participantScore)
     }
 
+    suspend fun updateActiveChallenge(
+        firebaseActiveChallenge: FirebaseActiveChallenge
+    ) {
+        firebaseDatabase.child(activeChallengeChild).child(firebaseActiveChallenge.activeChallengeId).setValue(firebaseActiveChallenge)
+    }
+
     suspend fun createActiveChallenge(
         firebaseActiveChallenge: FirebaseActiveChallenge,
         participantsIds: List<String>
