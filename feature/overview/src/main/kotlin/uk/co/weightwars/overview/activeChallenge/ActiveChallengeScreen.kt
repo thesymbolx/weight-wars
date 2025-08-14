@@ -75,12 +75,26 @@ fun ActiveChallengeScreen(
             onBack = onBack
         )
 
+        LeagueTable(activeChallengeState.participants)
+
         activeChallengeState.challenges.forEach { challengeState ->
             Spacer(modifier = Modifier.height(32.dp))
             ChallengeCard(
                 challenge = challengeState,
                 onScoreClick = onDayClick
             )
+        }
+    }
+}
+
+@Composable
+private fun LeagueTable(participants: List<ParticipantState>) {
+    Column {
+        participants.forEach {
+            Row {
+                Text(modifier = Modifier.weight(1f), text = it.name)
+                Text("${it.totalScore}")
+            }
         }
     }
 }

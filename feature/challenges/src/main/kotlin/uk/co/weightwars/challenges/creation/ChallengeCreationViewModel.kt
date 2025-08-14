@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.co.weightwars.data.models.ActiveChallenge
 import uk.co.weightwars.data.models.Challenge
+import uk.co.weightwars.data.models.Participant
 import uk.co.weightwars.data.models.SubChallenge
 import uk.co.weightwars.data.repository.ActiveChallengeRepo
 import uk.co.weightwars.data.repository.ChallengeRepo
@@ -76,12 +77,10 @@ class ChallengeCreationViewModel @Inject constructor(
 
     fun addChallenge(challengeId: Int) = viewModelScope.launch {
         val challenge = with(Dispatchers.IO) {
-            // Get all categories and find the specific challenge by ID
             val categories = challengeRepo.getAllCategories().first()
             categories.flatMap { it.challenges }.find { it.challengeId == challengeId }
         }
 
-        // Only add the challenge if it was found
         challenge?.let { foundChallenge ->
             challenges.add(foundChallenge)
 
@@ -135,7 +134,18 @@ class ChallengeCreationViewModel @Inject constructor(
                             title = challenge.title,
                             lengthInDays = challenge.days
                         )
-                    }
+                    },
+                    participants = participants.map {
+                        Participant(
+                            participantId = it.id,
+                            name = it.name,
+                            total = 0
+                        )
+                    } + Participant(
+                        participantId = currentUser!!.profile.profileId,
+                        name = currentUser!!.profile.name,
+                        total = 0
+                    )
                 ),
                 participantIds = participants.map { it.id } + currentUser!!.profile.profileId
             )

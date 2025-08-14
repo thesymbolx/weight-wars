@@ -17,6 +17,25 @@ class ActiveChallengeRemoteDataSource @Inject constructor(
 ) {
     val activeChallengeChild = "activeChallenge"
     val usersChild = "users"
+    val participantChild = "participant"
+
+    data class Participant(
+        val id: String,
+        val name: String,
+        val totalScore: Int
+    )
+
+    suspend fun updateUserActiveChallenge(
+        activeChallengeId: String,
+        participantScore: Participant
+    ) {
+        val ref = firebaseDatabase
+            .child(activeChallengeChild)
+            .child(activeChallengeId)
+            .child(participantChild)
+
+        ref.setValue(participantScore)
+    }
 
     suspend fun createActiveChallenge(
         firebaseActiveChallenge: FirebaseActiveChallenge,

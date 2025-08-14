@@ -1,7 +1,5 @@
 package uk.co.weightwars.data.repository
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
@@ -14,7 +12,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import uk.co.weightwars.data.models.ActiveChallenge
 import uk.co.weightwars.data.models.Participant
-import uk.co.weightwars.data.models.SubChallenge
 import uk.co.weightwars.data.models.toActiveChallenge
 import uk.co.weightwars.data.models.toNetworkChallenge
 import uk.co.weightwars.database.dao.UserDao
@@ -64,7 +61,8 @@ class ActiveChallengeRepo @Inject constructor(
                             startDate = startDate,
                             days = days,
                             isHardcoreMode = isHardcoreMode,
-                            subChallenges = subChallengesWithScores
+                            subChallenges = subChallengesWithScores,
+                            participants = participants
                         )
                     }
                 }
@@ -127,7 +125,8 @@ data class ActiveChallengeWithScores(
     val startDate: LocalDate,
     val days: Int,
     val isHardcoreMode: Boolean,
-    val subChallenges: List<SubChallengeWithScore>
+    val subChallenges: List<SubChallengeWithScore>,
+    val participants: List<Participant>
 )
 
 data class SubChallengeWithScore(

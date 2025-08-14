@@ -1,6 +1,7 @@
 package uk.co.weightwars.data.models
 
 import uk.co.weightwars.network.model.FirebaseActiveChallenge
+import uk.co.weightwars.network.model.FirebaseParticipant
 import uk.co.weightwars.network.model.FirebaseSubChallenge
 import java.time.LocalDate
 import kotlin.String
@@ -11,12 +12,14 @@ data class ActiveChallenge(
     val startDate: LocalDate,
     val days: Int,
     val isHardcoreMode: Boolean,
-    val subChallenges: List<SubChallenge>
+    val subChallenges: List<SubChallenge>,
+    val participants: List<Participant>
 )
 
 data class Participant(
-    val participantId: Long,
+    val participantId: String,
     val name: String,
+    val total: Int
 )
 
 data class SubChallenge(
@@ -50,6 +53,13 @@ fun ActiveChallenge.toNetworkChallenge() =
                 title = it.title,
                 lengthInDays = it.lengthInDays
             )
+        },
+        participants = participants.map {
+            FirebaseParticipant(
+                id = it.participantId,
+                name = it.name,
+                totalScore = it.total
+            )
         }
     )
 
@@ -65,6 +75,13 @@ fun FirebaseActiveChallenge.toActiveChallenge() =
                 subChallengeId = it.subChallengeId,
                 title = it.title,
                 lengthInDays = it.lengthInDays
+            )
+        },
+        participants = participants.map {
+            Participant(
+                participantId = it.id,
+                name = it.name,
+                total = it.totalScore
             )
         }
     )

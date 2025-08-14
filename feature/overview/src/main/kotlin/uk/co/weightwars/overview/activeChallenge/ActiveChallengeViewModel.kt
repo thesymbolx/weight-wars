@@ -19,7 +19,14 @@ import uk.co.weightwars.data.repository.Score
 data class ActiveChallengeState(
     val name: String = "",
     val challenges: List<ChallengeState> = emptyList(),
-    val totalScore: Int = 0
+    val totalScore: Int = 0,
+    val participants: List<ParticipantState> = emptyList()
+)
+
+data class ParticipantState(
+    val id: String,
+    val name: String,
+    val totalScore: Int
 )
 
 data class ChallengeState(
@@ -77,7 +84,14 @@ class ActiveChallengeViewModel @Inject constructor(
             totalScore = activeChallenge.subChallenges.sumOf { score ->
                 score.scores.sumOf { it.score }
             },
-            challenges = challengeState
+            challenges = challengeState,
+            participants = activeChallenge.participants.map {
+                ParticipantState(
+                    id = it.participantId,
+                    name = it.name,
+                    totalScore = it.total
+                )
+            }.sortedBy { it.totalScore }
         )
     }.stateIn(
         viewModelScope,
