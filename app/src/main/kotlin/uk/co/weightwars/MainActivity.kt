@@ -3,6 +3,7 @@ package uk.co.weightwars
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
@@ -50,7 +51,9 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             val hasCurrentUser = userRepo.getCurrentUser()
 
-            enableEdgeToEdge()
+            enableEdgeToEdge(
+                SystemBarStyle.dark(0)
+            )
             setContent {
                 App(hasCurrentUser != null)
             }

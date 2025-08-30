@@ -1,8 +1,11 @@
 package uk.co.weightwars.user
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -40,7 +43,11 @@ private fun CurrentUserName(
         mutableStateOf("")
     }
 
-    Column {
+    Column(
+        modifier = Modifier.statusBarsPadding()
+    ) {
+        Spacer(modifier = Modifier.height(20.dp))
+
         TextField(
             modifier = Modifier.fillMaxWidth(),
             value = userName,

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -50,7 +51,9 @@ fun FriendsScreen(
     val uiState by friendsViewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 
-    Column(modifier = Modifier.verticalScroll(scrollState)) {
+    Column(modifier = Modifier
+        .statusBarsPadding()
+        .verticalScroll(scrollState)) {
         Header(scrollState = scrollState, onBack = onBack)
 
         FriendsList(uiState.users) { userState ->
