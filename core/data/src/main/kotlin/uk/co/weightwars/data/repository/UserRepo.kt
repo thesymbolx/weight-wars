@@ -7,10 +7,9 @@ import javax.inject.Inject
 import uk.co.weightwars.network.model.FirebaseUser
 
 class UserRepo @Inject constructor(
-    private val userDao: UserDao,
     private val userRemoteDataSource: UserRemoteDataSource
 ) {
-    suspend fun getCurrentUser() = userDao.getCurrentUser()
+    suspend fun getCurrentUser() = userRemoteDataSource.
 
     fun getCurrentUserAsFlow() = userDao.getCurrentUserAsFlow()
 

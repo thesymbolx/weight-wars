@@ -28,8 +28,8 @@ interface UserDao {
         insertFriends(newFriends)
     }
 
-    @Query("SELECT * FROM profile LIMIT 1")
-    suspend fun getCurrentUser() : CurrentUser?
+//    @Query("SELECT * FROM profile LIMIT 1")
+//    suspend fun getCurrentUser() : CurrentUser?
 
     @Query("SELECT * FROM profile LIMIT 1")
     fun getCurrentUserAsFlow() : Flow<CurrentUser?>

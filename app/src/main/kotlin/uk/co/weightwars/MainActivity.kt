@@ -29,6 +29,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import uk.co.weightwars.data.repository.ChallengeRepo
@@ -42,31 +44,29 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var challengeRepo: ChallengeRepo
 
-    @Inject
-    lateinit var userRepo: UserRepo
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         lifecycleScope.launch {
-            val hasCurrentUser = userRepo.getCurrentUser()
+
 
             enableEdgeToEdge(
                 SystemBarStyle.dark(0)
             )
             setContent {
-                App(hasCurrentUser != null)
+                App()
             }
         }
     }
 }
 
 @Composable
-fun App(currentUserSet: Boolean) {
+fun App() {
     val navController = rememberNavController()
     val appState = rememberAppState(navController)
+
     var currentUserSet by remember {
-        mutableStateOf(currentUserSet)
+        mutableStateOf(Firebase.auth.currentUser != null)
     }
 
     WeightWarsTheme {
